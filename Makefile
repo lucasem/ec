@@ -1,19 +1,15 @@
-c = corebuild
+C = corebuild
 
-Chinese:
-	$(c) crp.native; cp crp.native test
+OBJ := main.native
 
-type:
-	$(c) type.native; cp type.native test
-morphology:
-	$(c) morphology.native; cp morphology.native test
-lambda:
-	$(c) lambda_calculus.native; cp lambda_calculus.native test
-polynomial:
-	$(c) polynomial.native; cp polynomial.native test
-regress:
-	$(c) regress.native; cp regress.native test
+all: main
+
+main:
+	$(C) $(OBJ)
+
+run: main
+	./main.native | tee log/output
+
 clean:
-	rm -rf _build test
-run:
-	./test | tee log/output
+	-$(RM) $(OBJ)
+	-$(RM) -r _build
