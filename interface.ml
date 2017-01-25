@@ -10,7 +10,7 @@ let ec
     ?log_prefix:(log_prefix = "grammar") (* grammars will be logged under log/LOGPREFIXlog_iteration *)
   =
   let g = ref (Library.make_flat_library initial_primitives) in
-  for i = 1 to iterations do 
+  for i = 1 to iterations do
     Printf.printf "\n \n \n Iteration %i \n" i;
     g := Em.expectation_maximization_iteration ("log/"^log_prefix^string_of_int i)
         lambda smoothing frontier_size tasks (!g)

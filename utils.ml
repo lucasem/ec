@@ -16,18 +16,18 @@ let safe_get_some message = function
   | Some(x) -> x
   | _ -> raise (Failure message);;
 
-let memorize f = 
+let memorize f =
   let table = Hashtbl.Poly.create () in
-  fun x -> 
+  fun x ->
     match Hashtbl.Poly.find table x with
     | Some(y) -> y
-    | None -> 
+    | None ->
       let y = f x in
       ignore(Hashtbl.Poly.add table x y);
       y
 
-let maximum_by ~cmp l = 
-  List.fold_left ~init:(List.hd_exn l) (List.tl_exn l) ~f:(fun a b -> 
+let maximum_by ~cmp l =
+  List.fold_left ~init:(List.hd_exn l) (List.tl_exn l) ~f:(fun a b ->
       if cmp a b > 0
       then a else b)
 
@@ -43,14 +43,14 @@ let rec last_one = function
   | [x] -> x
   | _::y -> last_one y
 
-let index_of l x = 
-  let rec loop a r = 
+let index_of l x =
+  let rec loop a r =
     match r with
       [] -> raise (Failure "index_of: not found")
     | (y::ys) -> if y = x then a else loop (a+1) ys
   in loop 0 l
 
-let set_equal c x y = 
+let set_equal c x y =
   let x = List.sort ~cmp:c x
   and y = List.sort ~cmp:c y in
   List.compare c x y = 0
@@ -58,23 +58,23 @@ let set_equal c x y =
 
 let log2 = log 2.
 
-let lse x y = 
+let lse x y =
   if is_invalid x then y else if is_invalid y then x else
   if x > y
   then x +. log (1.0 +. exp (y-.x))
   else y +. log (1.0 +. exp (x-.y))
 
 
-let lse_list (l : float list) : float = 
+let lse_list (l : float list) : float =
   List.fold_left l ~f:lse ~init:Float.neg_infinity
 
 (* log difference exponential: log(e^x - e^y) = x+log(1-e^(y-x)) *)
-let lde x y = 
+let lde x y =
   assert(x >= y);
   x +. log (1. -. exp (y-.x))
 
 
-let rec remove_duplicates l = 
+let rec remove_duplicates l =
   match l with
   | [] -> []
   | (x::y) -> x::(List.filter ~f:(fun z -> not (z = x)) (remove_duplicates y))
@@ -92,39 +92,39 @@ let merge_a_list ls ~f:c =
   Hashtbl.to_alist merged
 
 
-let combine_with f _ a b = 
+let combine_with f _ a b =
   match (a,b) with
   | (None,_) -> b
   | (_,None) -> a
   | (Some(x),Some(y)) -> Some(f x y)
 
 
-let (--) i j = 
+let (--) i j =
   let rec aux n acc =
     if n < i then acc else aux (n-1) (n :: acc)
   in aux j []
 
-let float_interval (i : float) (s : float) (j : float) : float list = 
+let float_interval (i : float) (s : float) (j : float) : float list =
   let rec aux n acc =
     if n < i then acc else aux (n-.s) (n :: acc)
   in aux j []
 
 let time () = Time.to_float @@ Time.now ()
 
-let time_it description callback = 
+let time_it description callback =
   let start_time = time () in
   let return_value = callback () in
-  Printf.printf "%s in %f seconds." description (Time.to_float (Time.now ()) -. start_time); 
+  Printf.printf "%s in %f seconds." description (Time.to_float (Time.now ()) -. start_time);
   print_newline ();
   return_value
 
 (* progress bar *)
 type progress_bar = { maximum_progress : int; mutable current_progress : int; }
 
-let make_progress_bar number_jobs = 
+let make_progress_bar number_jobs =
   { maximum_progress = number_jobs; current_progress = 0; }
 
-let update_progress_bar bar new_progress = 
+let update_progress_bar bar new_progress =
   let max = Float.of_int bar.maximum_progress in
   let old_dots = Int.of_float @@ Float.of_int bar.current_progress *. 80.0 /. max in
   let new_dots = Int.of_float @@ Float.of_int new_progress *. 80.0 /. max in
@@ -153,23 +153,23 @@ let pmap ?processes:(processes=4) ?bsize:(bsize=0) f input output =
       let rd, wt = Unix.pipe () in
       match Unix.fork () with
       | `In_the_child -> begin
-	  (* Child *)
-	  Unix.close rd;
-	  let start_idx = !next_idx in
-	  let answer    = Array.init (end_idx start_idx - start_idx + 1)
+          (* Child *)
+          Unix.close rd;
+          let start_idx = !next_idx in
+          let answer    = Array.init (end_idx start_idx - start_idx + 1)
               (fun i -> f (input (i+start_idx))) in
-	  let chan = Unix.out_channel_of_descr wt in
-	  Marshal.to_channel chan (start_idx, answer) [Marshal.Closures];
-	  Out_channel.close chan;
-	  flush stdout;
-	  exit 0
-	end
+          let chan = Unix.out_channel_of_descr wt in
+          Marshal.to_channel chan (start_idx, answer) [Marshal.Closures];
+          Out_channel.close chan;
+          flush stdout;
+          exit 0
+        end
       | `In_the_parent(pid) -> begin
-	  (* Parent *)
-	  Unix.close wt;
-	  in_streams := (rd,pid)::!in_streams;
-	  next_idx   := !next_idx + bsize;
-	end
+          (* Parent *)
+          Unix.close wt;
+          in_streams := (rd,pid)::!in_streams;
+          next_idx   := !next_idx + bsize;
+        end
     done;
     (* Receive input from processes *)
     let recvs = Unix.select ~read:(List.map !in_streams ~f:fst)
@@ -191,21 +191,21 @@ let pmap ?processes:(processes=4) ?bsize:(bsize=0) f input output =
 let number_of_cores = ref 1;; (* number of CPUs *)
 let counted_CPUs = ref false;; (* have we counted the number of CPUs? *)
 
-let cpu_count () = 
-  try match Sys.os_type with 
-    | "Win32" -> int_of_string (safe_get_some "CPU_count" @@ Sys.getenv "NUMBER_OF_PROCESSORS") 
+let cpu_count () =
+  try match Sys.os_type with
+    | "Win32" -> int_of_string (safe_get_some "CPU_count" @@ Sys.getenv "NUMBER_OF_PROCESSORS")
     | _ ->
       let i = Unix.open_process_in "getconf _NPROCESSORS_ONLN" in
       let close () = ignore (Unix.close_process_in i) in
       try Scanf.fscanf i "%d" (fun n -> close (); n) with e -> close (); raise e
       with
-      | Not_found | Sys_error _ | Failure _ | Scanf.Scan_failure _ 
+      | Not_found | Sys_error _ | Failure _ | Scanf.Scan_failure _
       | End_of_file | Unix.Unix_error (_, _, _) -> 1
 
 
-let parallel_map l ~f = 
+let parallel_map l ~f =
   flush stdout;
-  if not !counted_CPUs 
+  if not !counted_CPUs
   then begin
     number_of_cores := cpu_count ();
     Printf.printf "Counted %i CPUs" !number_of_cores; print_newline ();
@@ -219,22 +219,22 @@ let parallel_map l ~f =
   else
     let input_array = Array.of_list l in
     let output_array = Array.create (Array.length input_array) None in
-    let output_array = 
+    let output_array =
       pmap ~processes:(min (Array.length input_array) !number_of_cores)
-	(fun x -> Some(f x)) (Array.get input_array) output_array
-    in 
+        (fun x -> Some(f x)) (Array.get input_array) output_array
+    in
     flush stdout;
     Array.to_list output_array |> List.map ~f:(safe_get_some "parallel_map")
 
 
-let string_proper_prefix p s = 
-  let rec loop n = 
+let string_proper_prefix p s =
+  let rec loop n =
     (n >= String.length p) ||
     (p.[n] = s.[n] && loop (n+1))
-  in 
+  in
   String.length p < String.length s && loop 0
 
-let rec remove_index i l = 
+let rec remove_index i l =
   match (i,l) with
   | (0,x::xs) -> (x,xs)
   | (i,x::xs) -> let (j,ys) = remove_index (i-1) xs in
@@ -243,12 +243,12 @@ let rec remove_index i l =
 
 let rec random_subset l = function
   | 0 -> l
-  | s -> 
+  | s ->
     let i = Random.int (List.length l) in
     let (ith,r) = remove_index i l in
     ith :: (random_subset r (s-1))
 
-let avg l = 
+let avg l =
   List.fold_left ~init:0.0 ~f:(+.) l /. (Float.of_int @@ List.length l)
 
 let pi = 4.0 *. atan 1.0
@@ -259,17 +259,17 @@ let normal s m =
   in
   s *. n +. m
 
-let print_arguments () = 
+let print_arguments () =
   Array.iter Sys.argv ~f:(fun a -> Printf.printf "%s " a);
   print_newline ()
 
 (* samplers adapted from gsl *)
-let rec uniform_positive () = 
+let rec uniform_positive () =
   let u = Random.float 1.0 in
   if u > 0.0 then u else uniform_positive ()
 
 
-let rec sample_gamma a b = 
+let rec sample_gamma a b =
   if a < 1.0
   then
     let u = uniform_positive () in
@@ -277,8 +277,8 @@ let rec sample_gamma a b =
   else
     let d = a -. 1.0 /. 3.0 in
     let c = (1.0 /. 3.0) /. sqrt d in
-    let rec loop () = 
-      let rec inner_loop () = 
+    let rec loop () =
+      let rec inner_loop () =
         let x = normal 1.0 0.0 in
         let v = 1.0 +. c *. x in
         if v > 0.0 then (v,x) else inner_loop ()
@@ -287,19 +287,19 @@ let rec sample_gamma a b =
       let v = v*.v*.v in
       let u = uniform_positive () in
       if (u < 1.0 -. 0.0331 *. x *. x *. x *. x) ||
-         (log u < 0.5 *. x *. x +. d *. (1.0 -. v +. log v)) 
+         (log u < 0.5 *. x *. x +. d *. (1.0 -. v +. log v))
       then b *. d *. v
       else loop ()
     in loop ()
 
 
-let sample_uniform_dirichlet a n = 
+let sample_uniform_dirichlet a n =
   let ts = List.map (1--n) ~f:(fun _ -> sample_gamma a 1.0) in
   let norm = List.fold_left ~init:0.0 ~f:(+.) ts  in
   List.map ts ~f:(fun t -> t/.norm)
 
-let make_random_seeds n = 
-  let rec seeds others m = 
+let make_random_seeds n =
+  let rec seeds others m =
     if m = 0 then others else
       let r = Random.bits () in
       if List.mem others r then seeds others m
@@ -308,7 +308,7 @@ let make_random_seeds n =
 
 
 (*
-let () = 
+let () =
   let a =2. in
   let b = 2. in
   let samples = List.map (1--1000) ~f:(fun _ -> let (x,y) =(sample_gamma a 1.0,sample_gamma b 1.0) in
@@ -316,7 +316,7 @@ let () =
   let mean = (List.fold_left ~init:0.0 ~f:(+.) samples /. 1000.0) in
   let variance =List.fold_left ~init:0.0 ~f:(+.) (List.map samples ~f:(fun s -> (s-.mean)*.(s-.mean)))
                 /. 1000.0  in
-  Printf.printf "mean: %f\n" mean;  
+  Printf.printf "mean: %f\n" mean;
   Printf.printf "variance: %f\n" variance;;
 *)
 
