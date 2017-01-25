@@ -26,7 +26,7 @@ let makeTID context =
   (TID(fst context), (fst context+1, snd context))
 
 let bindTID i t context =
-  (fst context, TypeMap.add (snd context) i t)
+  (fst context, TypeMap.add (snd context) ~key:i ~data:t)
 
 let rec chaseType (context : tContext) (t : tp) : tp*tContext =
   match t with
@@ -41,7 +41,7 @@ let rec chaseType (context : tContext) (t : tp) : tp*tContext =
     match TypeMap.find (snd context) i with
     | Some(hit) ->
       let (t_, context_) = chaseType context hit in
-      let substitution = TypeMap.add (snd context_) i t_ in
+      let substitution = TypeMap.add (snd context_) ~key:i ~data:t_ in
       (t_, (fst context_, substitution))
     | None -> (t,context)
 
@@ -49,7 +49,7 @@ let rec occurs (i : int) (t : tp) : bool =
   match t with
   | TID(j) -> j = i
   | TCon(_,ts) ->
-    List.exists ts (occurs i)
+    List.exists ts ~f:(occurs i)
 
 let occursCheck = true
 
@@ -81,7 +81,7 @@ let can_unify (t1 : tp) (t2 : tp) : bool =
   let rec same_structure t1 t2 =
     match (t1, t2) with
     | (TCon(k1,as1), TCon(k2,as2)) when k1 = k2 ->
-      List.for_all2_exn as1 as2 same_structure
+      List.for_all2_exn as1 as2 ~f:same_structure
     | (TID(_),_) -> true
     | (_,TID(_)) -> true
     | _ -> false
@@ -120,7 +120,7 @@ let can_unify (t1 : tp) (t2 : tp) : bool =
       | (FCon(_,[]),FCon(_,[])) -> true
       | (FCon(_,x::xs),FCon(_,y::ys)) ->
         fast_unify x y &&
-        List.for_all2_exn xs ys (fun a b -> fast_unify (fast_chase a) (fast_chase b))
+        List.for_all2_exn xs ys ~f:(fun a b -> fast_unify (fast_chase a) (fast_chase b))
       | _ -> raise (Failure "constructors of different arity")
     in fast_unify (make_fast_type (ref []) t1) (make_fast_type (ref []) t2)
 
@@ -160,7 +160,7 @@ let rec next_type_variable t =
   match t with
   | TID(i) -> i+1
   | TCon(_,[]) -> 0
-  | TCon(_,is) -> List.fold_left ~f:max ~init:0 (List.map is next_type_variable)
+  | TCon(_,is) -> List.fold_left ~f:max ~init:0 (List.map is ~f:next_type_variable)
 
 (* tries to instantiate a universally quantified type with a given request *)
 let instantiated_type universal_type requested_type =
@@ -205,12 +205,3 @@ let t2 = TID(2);;
 let t3 = TID(3);;
 let t4 = TID(4);;
 
-
-let test_type () =
-  print_string (string_of_bool (can_unify (t1 @> t1) (t0 @> (tint @> t0))))
-  (* print_string (string_of_type @@ t1 @> (t2 @> t2) @> tint);
-  print_string (string_of_bool (can_unify (t1 @> t1) (make_arrow t1 t1)));
-  print_string (string_of_bool (can_unify (make_arrow t1 t1) (make_arrow (make_arrow t1 t2) t3)));
-  print_string (string_of_bool (not (can_unify (make_arrow t1 t1) (make_arrow (make_arrow t1 t2) (make_ground "int"))))); *)
-;;
-(* test_type ();; *)

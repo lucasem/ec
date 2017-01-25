@@ -125,8 +125,8 @@ let insert_expression_node (i2n,n2i,nxt) (n : expressionNode) : int =
   try
     Hashtbl.find_exn n2i n
   with _ ->
-    ignore(Hashtbl.add i2n (!nxt) n);
-    ignore(Hashtbl.add n2i n (!nxt));
+    ignore(Hashtbl.add i2n ~key:(!nxt) ~data:n);
+    ignore(Hashtbl.add n2i ~key:n ~data:(!nxt));
     incr nxt; !nxt - 1
 
 let node_in_graph (_,n2i,_) n =
@@ -178,7 +178,7 @@ let reachable_expressions dagger expressions =
       | ExpressionBranch(f,x) -> reach f; reach x
       | _ -> ()
     end in
-  List.iter expressions reach; !reachable
+  List.iter expressions ~f:reach; !reachable
 
 (* pulls the provided IDs out of the old expression graph and into a new one, *)
 (* facilitating garbage collection. *)
@@ -282,15 +282,6 @@ let substitute_wildcard original w new_W =
 let rec bottomless = function
   | Application(f,x) -> bottomless f && bottomless x
   | Terminal(n,_,_) -> not (n = "bottom")
-(*
-let rec all_antiunifications dagger i j = function
-  | 0 ->
-    if i == j then Int.Set.singleton j else Int.Set.empty
-  | 1 ->
-    if i == j
-    then Int.Set.singleton j else Int.Set.empty
-
- *)
 
 let rec antiunify_expressions dagger i j =
   if i = j
@@ -349,8 +340,8 @@ let wild_types dagger request i =
 (* performs type inference upon the entire graph of expressions *)
 (* returns an array whose ith element is the type of the ith expression *)
 let infer_graph_types dagger =
-  let type_map = Array.create (expression_graph_size dagger) (TID(0)) in
-  let done_map = Array.create (expression_graph_size dagger) false in
+  let type_map = Array.create ~len:(expression_graph_size dagger) (TID(0)) in
+  let done_map = Array.create ~len:(expression_graph_size dagger) false in
   let (i2n,_,_) = dagger in
   let rec infer i =
     if done_map.(i) then type_map.(i)
@@ -377,29 +368,3 @@ let rec expression_has_identifier v = function
   | Terminal(b,_,_) -> b = v
   | Application(l,r) ->
     expression_has_identifier v l || expression_has_identifier v r
-
-
-let test_expression () =
-  let t1 = TID(0) in
-  let e1 = Terminal("I", t1, Obj.magic (ref (fun x -> x))) in
-  let e42 = Terminal("31", t1, Obj.magic (ref 31)) in
-  let e2 = Terminal("1", t1, Obj.magic (ref 1)) in
-  let e3 = Application(Application(e1,e1),e2) in
-  let e4 = Terminal("+", t1, lift_binary (+)) in
-  let e5 = Application(Application(e4,e3),e42) in
-  let p = Terminal("p",t1,Obj.magic (ref (fun x -> Thread.delay 0.05; x))) in
-  let q = Application(p,e5) in
-  (match run_expression_for_interval 0.01 q with
-    Some(x) -> print_int x
-  | None -> print_string "timeout");
-  (match run_expression_for_interval 0.1 q with
-    Some(x) -> print_int x
-  | None -> print_string "timeout");
-  Thread.delay 1.;
-  (match run_expression_for_interval 0.1 q with
-    Some(x) -> print_int x
-  | None -> print_string "timeout")
-;;
-
-
-(* test_expression ();;  *)

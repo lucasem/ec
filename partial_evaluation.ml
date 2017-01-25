@@ -8,7 +8,7 @@ open Utils
 let extra_primitives = ref [];;
 let register_primitive name arguments callback =
   let callback = fun terms ->
-  List.map terms (fun t -> if t = c_bottom then None else Some(terminal_thing t)) |> callback
+  List.map terms ~f:(fun t -> if t = c_bottom then None else Some(terminal_thing t)) |> callback
   in extra_primitives := (name,(arguments,callback)) :: !extra_primitives;;
 
 
@@ -39,7 +39,7 @@ let try_primitive e =
       | Some(r) -> r)
       else match List.hd_exn actual with
       | Terminal(n,_,_) when n.[0] = '?' ->
-        Blocked(int_of_string @@ String.sub n 1 (String.length n - 1),
+        Blocked(int_of_string @@ String.sub n ~pos:1 ~len:(String.length n - 1),
                List.hd_exn argument)
       | _ -> walk_arguments (List.tl_exn argument) (List.tl_exn actual)
     in walk_arguments arguments actual_arguments
@@ -57,7 +57,7 @@ let try_primitive e =
 let rec reduce_expression = function
   | Terminal(_,_,_) -> NormalForm
   | Application(Terminal(q,_,_),_) when q.[0] = '?' ->
-    Blocked(int_of_string @@ String.sub q 1 (String.length q - 1), [])
+    Blocked(int_of_string @@ String.sub q ~pos:1 ~len:(String.length q - 1), [])
   (* basis combinators *)
   | Application(Terminal(i,_,_),e) when i = "I" -> Stepped(e)
   | Application(Application(Terminal(k,_,_),e),_) when k = "K" -> Stepped(e)
@@ -80,12 +80,12 @@ let rec reduce_expression = function
     Stepped(Application(Application(c_cons,x),Application(Application(c_append,xs),ys)))
   | Application(Application(Terminal(a,_,_),Terminal(q,_,_)),_)
     when a = "@" && q.[0] = '?' ->
-    Blocked(int_of_string @@ String.sub q 1 (String.length q - 1),
+    Blocked(int_of_string @@ String.sub q ~pos:1 ~len:(String.length q - 1),
             [c_null;Application(Application(c_cons,make_wildcard 1),make_wildcard 2)])
   (* last one *)
   | Application(Terminal(l,_,_), Terminal(q,_,_))
     when l = "last-one" && q.[0] = '?' ->
-    Blocked(int_of_string @@ String.sub q 1 (String.length q - 1),
+    Blocked(int_of_string @@ String.sub q ~pos:1 ~len:(String.length q - 1),
             [Application(Application(c_cons,make_wildcard 1),make_wildcard 2);])
   | Application(Terminal(l,_,_), argument)
     when l = "last-one" -> begin
@@ -98,7 +98,7 @@ let rec reduce_expression = function
               match rest with
               | Terminal(n,_,_) when n = "null" -> Stepped(first)
               | Terminal(q,_,_) when q.[0] = '?' ->
-                Blocked(int_of_string @@ String.sub q 1 (String.length q - 1),
+                Blocked(int_of_string @@ String.sub q ~pos:1 ~len:(String.length q - 1),
                         [Application(Application(c_cons,make_wildcard 1),make_wildcard 2);c_null;])
               | Application(Application(c_,_),_) ->
                 (assert(string_of_expression c_ = "cons");

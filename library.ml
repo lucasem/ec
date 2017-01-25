@@ -54,9 +54,9 @@ let program_likelihoods (log_application,library) dagger program_types requests 
             lse terminal_probability application_probability
         | _ -> terminal_probability
       in
-      ignore(Hashtbl.add likelihoods (i,request) log_probability);
+      ignore(Hashtbl.add likelihoods ~key:(i,request) ~data:log_probability);
       log_probability
-  in Int.Map.iter requests (fun ~key ~data ->
+  in Int.Map.iteri requests ~f:(fun ~key ~data ->
       List.iter data ~f:(fun r -> ignore (likelihood key r))); likelihoods
 
 (* computes likelihood of a possibly ill typed program: returns None if it doesn't type *)
@@ -99,8 +99,8 @@ let fit_grammar smoothing ?application_smoothing (log_application,library) dagge
   let number_terminals = List.length terminal_order in
   let counts = { application_counts = log application_smoothing;
                  terminal_counts = log application_smoothing;
-                 use_counts = Array.create number_terminals (log smoothing);
-                 possible_counts = Array.create number_terminals (log smoothing); } in
+                 use_counts = Array.create ~len:number_terminals (log smoothing);
+                 possible_counts = Array.create ~len:number_terminals (log smoothing); } in
   let rec uses weight i request =
     if not (is_wildcard dagger i) then begin
       let l = Hashtbl.find_exn likelihoods (i,request) in
@@ -108,11 +108,11 @@ let fit_grammar smoothing ?application_smoothing (log_application,library) dagge
       let hits = List.filter terminal_order ~f:(fun (j,_) -> can_match_wildcards dagger i j) in
       if not (List.is_empty hits) then begin
         let offsets = List.map hits ~f:(fun (_,(_,l,o)) -> (o,l)) in
-        let offset_Z = lse_list @@ List.map offsets snd in
+        let offset_Z = lse_list @@ List.map offsets ~f:snd in
         let offsets = List.map offsets ~f:(fun (o,l) -> (o,l-.offset_Z)) in
-        let others = List.filter terminal_order (fun (_,(t,_,_)) -> can_unify t request) in
-        let other_offsets = List.map others (fun (_,(_,_,o)) -> o) in
-        let z = lse_list (List.map others (fun (_,(_,l,_)) -> l)) in
+        let others = List.filter terminal_order ~f:(fun (_,(t,_,_)) -> can_unify t request) in
+        let other_offsets = List.map others ~f:(fun (_,(_,_,o)) -> o) in
+        let z = lse_list (List.map others ~f:(fun (_,(_,l,_)) -> l)) in
         let terminal_likelihood = log_terminal+.offset_Z-.z -.l in
         List.iter offsets ~f:(fun (o,ol) -> let u = counts.use_counts.(o) in
                                counts.use_counts.(o) <- lse u (ol+.terminal_likelihood+.weight));
@@ -151,7 +151,7 @@ let fit_grammar smoothing ?application_smoothing (log_application,library) dagge
   List.iter corpus ~f:(fun ((i,request),w) -> uses w i request);
   let log_application = counts.application_counts -.
                         lse counts.application_counts counts.terminal_counts in
-  let distribution = List.map terminal_order (fun (i,(_,_,o)) ->
+  let distribution = List.map terminal_order ~f:(fun (i,(_,_,o)) ->
       let p = counts.use_counts.(o) -. counts.possible_counts.(o)
       and e = extract_expression dagger i
       in (e, (p,infer_type e)))
@@ -160,14 +160,14 @@ let fit_grammar smoothing ?application_smoothing (log_application,library) dagge
 (* wrapper over fit_grammar that does not assume a corpus structure *)
 let fit_grammar_to_tasks smoothing grammar dagger program_types requests task_solutions =
   let likelihoods = program_likelihoods grammar dagger program_types requests in
-  let task_posteriors = List.map task_solutions (fun (t,s) ->
-    List.map s (fun (i,l) ->
+  let task_posteriors = List.map task_solutions ~f:(fun (t,s) ->
+    List.map s ~f:(fun (i,l) ->
           ((i,t.task_type),l+.Hashtbl.find_exn likelihoods (i,t.task_type)))) in
-  let zs = List.map task_posteriors (fun p ->
-    lse_list @@ List.map p snd) in
+  let zs = List.map task_posteriors ~f:(fun p ->
+    lse_list @@ List.map p ~f:snd) in
   let task_posteriors = List.map2_exn task_posteriors zs ~f:(fun p z ->
     List.map p ~f:(fun (i,l) -> (i,l-.z))) in
-  let corpus = merge_a_list task_posteriors lse in
+  let corpus = merge_a_list task_posteriors ~f:lse in
   fit_grammar smoothing grammar dagger program_types likelihoods corpus
 
 (* various built-in primitives *)
@@ -229,7 +229,7 @@ let c_bottom = Terminal("bottom",canonical_type t1,Obj.magic @@ ref None)
 
 let c_one = Terminal("1",tint,Obj.magic (ref 1));;
 let c_zero = Terminal("0",tint,Obj.magic (ref 0));;
-let c_numbers = List.map (0--9) expression_of_int;;
+let c_numbers = List.map (0--9) ~f:expression_of_int;;
 let c_plus = Terminal("+",
                      make_arrow tint (make_arrow tint tint),
                      lift_binary (+));;
@@ -239,7 +239,7 @@ let c_times = Terminal("*",
 let polynomial_library =
   make_flat_library @@ [c_S;c_B;c_C;c_I;c_plus;c_times;c_zero;c_one;](*  @ c_numbers *);;
 
-let c_reals = List.map (0--9) (expression_of_float % Float.of_int);;
+let c_reals = List.map (0--9) ~f:(expression_of_float % Float.of_int);;
 let c_sin = Terminal("sin",
                     make_arrow treal treal,
                     lift_unary sin);;
@@ -306,47 +306,47 @@ let math_list_library =
 let string_of_library (log_application,bindings) =
   String.concat ~sep:"\n"
     ((Float.to_string (exp log_application))::
-     (List.map bindings (fun (e,(w,t)) ->
+     (List.map bindings ~f:(fun (e,(w,t)) ->
           Printf.sprintf "\t %f \t %s : %s " w (string_of_expression e) (string_of_type t))));;
 
 let all_terminals = ref (List.map ([c_K;c_S;c_B;c_C;c_I;c_bottom;
                           c_sin;c_cos;c_times_dot;c_plus_dot;c_plus;c_times;c_inner_product;
                           c_null;c_append;c_rcons;c_cons;c_append1;c_last_one;c_exists;c_car;c_cdr;]
                                    @ c_numbers @ c_reals)
-                           (fun e -> (string_of_expression e,e)));;
+                           ~f:(fun e -> (string_of_expression e,e)));;
 let register_terminal t =
   all_terminals := (string_of_expression t,t) :: !all_terminals;;
-let register_terminals t = List.iter t register_terminal;;
+let register_terminals t = List.iter t ~f:register_terminal;;
 
 (* replaces all of the "unit references" with actual unit references. necessary for marshaling *)
 let scrub_graph (i2n,n2i,_) =
   let substitution = ref [] in
-  Hashtbl.iter i2n (fun ~key:i ~data:n ->
+  Hashtbl.iteri i2n ~f:(fun ~key:i ~data:n ->
     match n with
     | ExpressionLeaf(Terminal(name,t,_)) when name.[0] <> '?' ->
       let clean = ExpressionLeaf(Terminal(name,t,ref ()))
       and dirty = n in
       substitution := (i,clean,dirty) :: !substitution
     | _ -> ());
-  List.iter !substitution (fun (i,c,d) ->
-    Hashtbl.replace i2n i c;
+  List.iter !substitution ~f:(fun (i,c,d) ->
+    Hashtbl.set i2n ~key:i ~data:c;
     Hashtbl.remove n2i d;
-    ignore(Hashtbl.add n2i c i))
+    ignore(Hashtbl.add n2i ~key:c ~data:i))
 
 (* undoes the above operation *)
 let dirty_graph (i2n,n2i,_) =
   let substitution = ref [] in
-  Hashtbl.iter i2n (fun ~key:i ~data:n ->
+  Hashtbl.iteri i2n ~f:(fun ~key:i ~data:n ->
     match n with
     | ExpressionLeaf(Terminal(name,_,_)) when name.[0] <> '?' ->
       let clean = n
       and dirty = ExpressionLeaf(List.Assoc.find_exn !all_terminals name) in
       substitution := (i,clean,dirty) :: !substitution
     | _ -> ());
-  List.iter !substitution (fun (i,c,d) ->
-    Hashtbl.replace i2n i d;
+  List.iter !substitution ~f:(fun (i,c,d) ->
+    Hashtbl.set i2n ~key:i ~data:d;
     Hashtbl.remove n2i c;
-    ignore(Hashtbl.add n2i d i))
+    ignore(Hashtbl.add n2i ~key:d ~data:i))
 
 
 (* parses an expression. has to be in library because needs definitions of terminals *)
@@ -365,7 +365,7 @@ let expression_of_string s =
                 while !j < String.length s && s.[!j] <> ')' && s.[!j] <> ' ' do
                   incr j
                 done;
-                let name = String.sub s !i (!j - !i) in
+                let name = String.sub s ~pos:!i ~len:(!j - !i) in
                 i := !j;
                 if name.[0] = '?'
                 then Terminal(name,t1,ref ())
@@ -383,13 +383,13 @@ let load_library f =
     while true do
       let l = String.strip @@ input_line i in
       let weight_index = safe_get_some "load_library: None" @@ String.index l ' ' in
-      let w = Float.of_string @@ String.sub l 0 weight_index in
+      let w = Float.of_string @@ String.sub l ~pos:0 ~len:weight_index in
       let e = expression_of_string @@ String.strip @@
-        String.sub l weight_index (String.length l - weight_index) in
+        String.sub l ~pos:weight_index ~len:(String.length l - weight_index) in
       productions := (e,w) :: !productions
     done; (0.,[])
   with End_of_file ->
-    (log log_application, List.map !productions (fun (e,w) -> (e, (w,infer_type e))))
+    (log log_application, List.map !productions ~f:(fun (e,w) -> (e, (w,infer_type e))))
 
 let rec remove_lambda v = function
   | Terminal(b,_,_) when b = v -> c_I
@@ -417,35 +417,3 @@ let rec remove_lambda v = function
     end
   (* only possibility is terminal not matching v *)
   | t -> Application(c_K,t)
-
-
-let test_library () =
-  List.map ["I";"((C +) 1)";"(K (+ (0 S)))"]
-    (fun s -> print_string (string_of_expression @@ expression_of_string s); print_newline ());;
-
-
-
-(* test_library ();; *)
-
-
-
-let debug_type () =
-  let problems = ["(C C)";"((C C) S)";"(C ((C C) S))";
-                  "((C ((C C) S)) I)";"(((C ((C C) S)) I) C)";]
-                 |> List.map ~f:expression_of_string in
-  List.iter problems ~f:(fun e ->
-      Printf.printf "%s : \t%s\n" (string_of_expression e)
-        (string_of_type @@ infer_type e));
-  let left_type = expression_of_string "((C ((C C) S)) I)" |> infer_type in
-  let requested_type = argument_request (treal @> treal) left_type in
-  Printf.printf "request for C: %s\n" (string_of_type requested_type);
-  Printf.printf "can see be used: %B\n" (can_unify requested_type (terminal_type c_C));
-  let (left_type,c) = infer_context (1,TypeMap.empty) (expression_of_string "((C ((C C) S)) I)") in
-  let (rt,c2) = makeTID c in
-  let c3 = unify c2 left_type (make_arrow rt (make_arrow treal treal)) in
-  let (requested_type,c4) = chaseType c3 rt in
-  Printf.printf "request for C: %s\n" (string_of_type requested_type);
-  Printf.printf "can see be used: %B\n" (can_unify requested_type (terminal_type c_C));
-
-;;
-(* debug_type ();; *)

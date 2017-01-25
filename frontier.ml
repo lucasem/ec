@@ -25,7 +25,7 @@ let frontier_requests frontiers =
 (* each frontier is a list of tuples of (expression ID,log likelihood,log prior) *)
 (* also returns an expression graph *)
 let make_frontiers size keep_size grammar tasks =
-  let (bottom_tasks,top_tasks) = List.partition_tf tasks (fun t ->
+  let (bottom_tasks,top_tasks) = List.partition_tf tasks ~f:(fun t ->
       match t.score with
       | Seed(_) -> true
       | LogLikelihood(_) -> false) in
@@ -37,8 +37,8 @@ let make_frontiers size keep_size grammar tasks =
       let top_program_scores = score_programs dagger top_frontiers tasks in
       (* display the hit rate *)
       begin
-        let number_hit = List.length (List.filter top_program_scores (fun scores ->
-            List.exists scores (fun (_,s) -> s > log (0.999)))) in
+        let number_hit = List.length (List.filter top_program_scores ~f:(fun scores ->
+            List.exists scores ~f:(fun (_,s) -> s > log (0.999)))) in
         let number_of_partial = List.length (List.filter ~f:(fun scores ->
             List.length scores > 0
           ) top_program_scores) in
@@ -79,13 +79,13 @@ let make_frontiers size keep_size grammar tasks =
           (temp_dagger,f)) in
       List.map graphs_and_frontiers ~f:(fun (g,f) ->
           dirty_graph g;
-          List.map f (fun (i,l) -> (insert_expression dagger @@ extract_expression g i,0.0,l)))
+          List.map f ~f:(fun (i,l) -> (insert_expression dagger @@ extract_expression g i,0.0,l)))
     end
   in
   (* coalesced top and bottom *)
   let bottom = ref bottom_program_scores
   and top = ref top_program_scores in
-  let fs = List.map tasks (fun t ->
+  let fs = List.map tasks ~f:(fun t ->
       let f = match t.score with
         | Seed(_) -> bottom
         | LogLikelihood(_) -> top in

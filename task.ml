@@ -24,7 +24,7 @@ let modify_grammar grammar t =
       ~f:(fun (e,w) -> (e,(w,infer_type e))) in
   let special_weights =
     extra @
-    (List.map (snd grammar) (fun (e, (w,ty)) -> (e,(propose e w,ty))) |>
+    (List.map (snd grammar) ~f:(fun (e, (w,ty)) -> (e,(propose e w,ty))) |>
      List.filter ~f:(not % List.Assoc.mem extra ~equal:expression_equal % fst))
   in
   (fst grammar,special_weights)
@@ -45,7 +45,7 @@ let score_programs dagger frontiers tasks =
   scores
 
 let save_best_programs f dagger task_solutions =
-  let s = String.concat ~sep:"\n" @@ List.map task_solutions (fun (t,s) ->
+  let s = String.concat ~sep:"\n" @@ List.map task_solutions ~f:(fun (t,s) ->
       if List.length s > 0
       then let (e,p) = List.fold_left (List.tl_exn s) ~init:(List.hd_exn s) ~f:(fun (f,p) (g,q) ->
           if p > q then (f,p) else (g,q))  in

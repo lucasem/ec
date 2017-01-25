@@ -20,7 +20,7 @@ let rec expectation_maximization_compress
       List.map ss ~f:(fun (i,ll,lp) -> (i,ll+.lp-.z))) in
   let candidate_rewards =
     let r = Int.Table.create () in
-    List.iter candidates (fun c -> ignore(Hashtbl.add r c Float.neg_infinity));
+    List.iter candidates ~f:(fun c -> ignore(Hashtbl.add r ~key:c ~data:Float.neg_infinity));
     r
   in
   let rec reward_expression weight i =
@@ -30,7 +30,7 @@ let rec expectation_maximization_compress
       reward_expression weight r;
       (try
          let old = Hashtbl.find_exn candidate_rewards i in
-         Hashtbl.replace candidate_rewards ~key:i ~data:(lse old weight)
+         Hashtbl.set candidate_rewards ~key:i ~data:(lse old weight)
        with Not_found -> ())
     | _ -> ()
   in
@@ -79,7 +79,7 @@ let expectation_maximization_iteration ?compression_tries:(compression_tries = 1
   let program_scores = score_programs dagger frontiers tasks in
   (* display the hit rate *)
   let number_hit = List.length (List.filter ~f:(fun scores ->
-      List.exists scores (fun (_,s) -> s > log (0.999))
+      List.exists scores ~f:(fun (_,s) -> s > log (0.999))
     ) program_scores) in
   let number_of_partial = List.length (List.filter ~f:(fun scores ->
       List.length scores > 0
@@ -89,7 +89,7 @@ let expectation_maximization_iteration ?compression_tries:(compression_tries = 1
   (* compute likelihoods under grammar and then normalize the frontiers *)
   let type_array = infer_graph_types dagger in
   let requests = frontier_requests frontiers in
-  let candidates = candidate_ground_fragments dagger @@ List.map program_scores (List.map ~f:fst) in
+  let candidates = candidate_ground_fragments dagger @@ List.map program_scores ~f:(List.map ~f:fst) in
   let g0 = make_flat_library @@ List.filter ~f:is_terminal @@ List.map ~f:fst @@ snd grammar in
   (* makes the nth (random) frontiers *)
   let random_frontier n s =
@@ -122,40 +122,10 @@ let expectation_maximization_iteration ?compression_tries:(compression_tries = 1
   print_newline ();
   (* save the best programs *)
   let task_solutions = List.zip_exn tasks program_scores |> List.map ~f:(fun (t,solutions) ->
-      (t, List.map solutions (fun (i,s) ->
+      (t, List.map solutions ~f:(fun (i,s) ->
            let e = extract_expression dagger i in
            let error_message = "em_best: "^(string_of_expression e) in
            (i,s+. (safe_get_some error_message @@ likelihood_option final_grammar t.task_type e))))) in
   save_best_programs (prefix^"_programs") dagger task_solutions;
   ignore(bic_posterior_surrogate lambda dagger final_grammar task_solutions);
   final_grammar
-
-
-
-let backward_iteration
-    prefix lambda smoothing frontier_size keep_size
-    tasks grammar = grammar
-(* backwards search did not work well anyways *)
-(*
-  let (dagger,frontiers) = make_frontiers frontier_size keep_size grammar tasks in
-  let type_array = infer_graph_types dagger in
-  print_endline "Done inferring graph types.";
-  let requests = frontier_requests frontiers in
-  print_endline "Done getting requests.";
-  let task_solutions = List.zip_exn tasks @@
-    List.map frontiers (List.map ~f:(fun (i,l,_) -> (i,l)))
-  in
-  (* the following lines are for running EM *)
-  let solutions = List.map task_solutions ((List.map ~f:fst) % snd) in
-  let candidates = candidate_fragments dagger solutions in
-  let g = expectation_maximization_compress
-      lambda smoothing smoothing grammar dagger type_array requests candidates tasks @@
-    List.map task_solutions (fun (_,) -> ) in
-  (*   let g = compress lambda smoothing dagger type_array requests task_solutions in *)
-  (* save the grammar *)
-  Out_channel.write_all (prefix^"_grammar") ~data:(string_of_library g);
-  (* save the best programs *)
-  let task_solutions = List.zip_exn tasks frontiers in
-  save_best_programs (prefix^"_programs") dagger task_solutions;
-  g
-*)

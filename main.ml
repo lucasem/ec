@@ -23,7 +23,7 @@ let main () =
   ~lambda:1.5
   ~smoothing:1.0
   ~frontier_size:1000
-  ~log_prefix:"lucas"
+  ~log_prefix:"kn"
 ;;
 
 

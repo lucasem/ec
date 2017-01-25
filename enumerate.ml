@@ -15,16 +15,16 @@ let enumerate_bounded ?prune:(prune = do_not_prune) (* testing of expressions as
     dagger (log_application,distribution) rt bound =
   let number_pruned = ref 0 in
   let log_terminal = log (1.0-. exp log_application) in
-  let terminals = List.map distribution (fun (e,(l,t)) ->
+  let terminals = List.map distribution ~f:(fun (e,(l,t)) ->
       (t,(e, l))) in
   let type_blacklist = TID(0) :: ([c_S;c_B;c_C;c_K;c_F;c_I] |> List.map ~f:terminal_type) in
   let rec enumerate can_identify requestedType budget k =
     (* first do the terminals *)
-    let availableTerminals = List.filter terminals (fun (t,(e,_)) ->
+    let availableTerminals = List.filter terminals ~f:(fun (t,(e,_)) ->
         can_unify t requestedType && (not (reduce_symmetries) || can_identify || compare_expression c_I e <> 0)) in
-    let z = lse_list (List.map availableTerminals (fun (_,(_,l)) -> l)) in
-    let availableTerminals = List.map availableTerminals (fun (t,(e,l)) -> (t,(e,l-.z))) in
-    let availableTerminals = List.filter availableTerminals (fun (t,(_,l)) -> 0.0-.log_terminal-.l < budget) in
+    let z = lse_list (List.map availableTerminals ~f:(fun (_,(_,l)) -> l)) in
+    let availableTerminals = List.map availableTerminals ~f:(fun (t,(e,l)) -> (t,(e,l-.z))) in
+    let availableTerminals = List.filter availableTerminals ~f:(fun (t,(_,l)) -> 0.0-.log_terminal-.l < budget) in
     List.iter availableTerminals ~f:(fun (t,(e,l)) ->
         let it = safe_get_some "enumeration: availableTerminals" (instantiated_type t requestedType) in
         k e (log_terminal+.l) it t);
@@ -49,7 +49,7 @@ let enumerate_bounded ?prune:(prune = do_not_prune) (* testing of expressions as
   let hits = Int.Table.create () in
   enumerate true rt bound (fun i _ _ _ ->
       if not (prune i) then
-        Hashtbl.replace hits ~key:(insert_expression dagger i) ~data:true
+        Hashtbl.set hits ~key:(insert_expression dagger i) ~data:true
       else incr number_pruned);
   (Hashtbl.keys hits, !number_pruned)
 
@@ -74,16 +74,16 @@ let always_sampled_prior = false (* forces us to enumerate from the prior *)
 let enumerate_frontiers_for_tasks grammar frontier_size tasks
   : (tp*int list) list*expressionGraph =
   let start_time = time () in
-  let (special_tasks,normal_tasks) = List.partition_tf tasks (fun t -> is_some @@ t.proposal) in
-  let types = remove_duplicates (List.map tasks (fun t -> t.task_type)) in
+  let (special_tasks,normal_tasks) = List.partition_tf tasks ~f:(fun t -> is_some @@ t.proposal) in
+  let types = remove_duplicates (List.map tasks ~f:(fun t -> t.task_type)) in
   Printf.printf "number of (normal) types: %i \n" (List.length types);
   let dagger = make_expression_graph 100000 in
-  let indices = List.map types (fun t ->
+  let indices = List.map types ~f:(fun t ->
       if always_sampled_prior || not (List.is_empty normal_tasks)
       then enumerate_ID dagger grammar t frontier_size
       else []) in
   let special_indices =
-    let parallel_results = parallel_map special_tasks (fun t ->
+    let parallel_results = parallel_map special_tasks ~f:(fun t ->
         let dagger = make_expression_graph 10000 in
         Printf.printf "Enumerating for task \"%s\"" t.name; print_newline ();
         let special_grammar = modify_grammar grammar t in
@@ -95,13 +95,13 @@ let enumerate_frontiers_for_tasks grammar frontier_size tasks
            ~f:Int.Set.add ~init:Int.Set.empty)) in
     List.map parallel_results ~f:(fun (d,t,i) ->
       dirty_graph d;
-      (t,Int.Set.map i (insert_expression dagger % extract_expression d))) in
+      (t,Int.Set.map i ~f:(insert_expression dagger % extract_expression d))) in
   let end_time = time () in
   Printf.printf "Enumerated all programs in %f seconds." (end_time-.start_time);
   print_newline ();
   let start_time = time() in
   let indices = List.zip_exn types @@
-    List.map indices (fun iDs ->
+    List.map indices ~f:(fun iDs ->
         List.fold_left iDs ~init:Int.Set.empty ~f:Int.Set.add) in
   (* combines special indices with normal indices *)
   let indices = List.fold_left special_indices ~f:(fun i (ty,j) ->
@@ -115,25 +115,6 @@ let enumerate_frontiers_for_tasks grammar frontier_size tasks
   Printf.printf "Coalesced %i programs in %f seconds." number_of_programs (end_time-.start_time);
   print_newline ();
   (indices |> List.map ~f:(fun (t,s) -> (t,Int.Set.to_list s)), dagger)
-
-
-(*
-let test_enumerate () =
-  let dagger = make_expression_graph 10000 in
-  let indices = enumerate_bounded dagger polynomial_library (make_arrow tint tint) 11.49 in
-  let type_array = infer_graph_types dagger in
-  let requests = Int.Map.map indices (fun _ -> [(make_arrow tint tint)]) in
-  let ls = program_likelihoods polynomial_library dagger type_array requests in
-  let through = List.map (Int.Map.to_alist indices)
-      (fun (e,_) -> ((Hashtbl.find_exn ls (e,make_arrow tint tint)),(extract_expression dagger e)))
-  in let kansas = List.sort (fun (l,_) (r,_) -> compare l r) through in
-  print_string (String.concat ~sep:"\n" (List.map ~f:(fun (l,e) ->
-      string_of_expression  e ^ "\t" ^ Float.to_string l)
-      kansas  ))
-
-(* test_enumerate ();; *)
- *)
-
 
 (* computes likelihood of MAP parse *)
 let rec map_likelihood g request e =

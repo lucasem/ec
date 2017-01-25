@@ -1,15 +1,12 @@
 C = corebuild
 
-OBJ := main.native
-
-all: main
+default: main
 
 main:
-	$(C) $(OBJ)
+	$(C) -quiet main.native
 
 run: main
 	./main.native | tee log/output
 
 clean:
-	-$(RM) $(OBJ)
-	-$(RM) -r _build
+	$(C) -clean

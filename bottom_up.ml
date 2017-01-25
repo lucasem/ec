@@ -21,13 +21,13 @@ let get_templates e t =
       (target,new_template) :: collect_templates barriers target new_template
     | NormalForm -> []
     | Blocked(w,instantiations) ->
-      let new_targets = List.map instantiations (substitute_wildcard target w) in
-      let new_templates = List.map instantiations (substitute_wildcard template w) in
+      let new_targets = List.map instantiations ~f:(substitute_wildcard target w) in
+      let new_templates = List.map instantiations ~f:(substitute_wildcard template w) in
       List.map2_exn ~f:(collect_templates @@ barriers+1) new_targets new_templates |> List.concat
   in
   let arity = get_arity t in
-  List.map (0--arity) (fun number_arguments ->
-    let arguments = List.map (1--number_arguments) (fun a -> make_wildcard @@ a+1) in
+  List.map (0--arity) ~f:(fun number_arguments ->
+    let arguments = List.map (1--number_arguments) ~f:(fun a -> make_wildcard @@ a+1) in
     let target = List.fold_left arguments ~init:e ~f:(fun f x -> Application(f,x)) in
     collect_templates 0 target target)
   |> List.concat |> List.filter ~f:(bottomless % snd)
@@ -38,13 +38,13 @@ let match_template dagger template i =
     match t with
     | Terminal("?",_,_) -> true
     | Terminal(name,_,_) when name.[0] = '?' -> begin
-        let name_ID = int_of_string @@ String.sub name 1 (String.length name - 1) in
+        let name_ID = int_of_string @@ String.sub name ~pos:1 ~len:(String.length name - 1) in
         try
           let k = List.Assoc.find_exn !bindings name_ID in
           match combine_wildcards dagger j k with
           | None -> false
           | Some(c) -> begin
-            bindings := List.map !bindings (fun (i,l) ->
+            bindings := List.map !bindings ~f:(fun (i,l) ->
                 (i, if i = name_ID then c else l));
             true
           end
@@ -72,7 +72,7 @@ let apply_template template bindings =
   let rec apply t =
     match t with
     | Terminal(name,_,_) when name.[0] = '?' && String.length name > 1 -> begin
-        let name_ID = int_of_string @@ String.sub name 1 (String.length name - 1) in
+        let name_ID = int_of_string @@ String.sub name ~pos:1 ~len:(String.length name - 1) in
         try
           List.Assoc.find_exn bindings name_ID
         with _ ->
@@ -90,18 +90,18 @@ let backward_children dagger grammar request rewrites j =
         match match_template dagger template i with
         | None -> a
         | Some(bindings) ->
-          (handler @@ List.map bindings (fun (b,i) -> (b,extract_expression dagger i)))::a) in
+          (handler @@ List.map bindings ~f:(fun (b,i) -> (b,extract_expression dagger i)))::a) in
     match Hashtbl.find_exn i2n i with
     | ExpressionLeaf(_) -> head_rewrites
     | ExpressionBranch(f,x) ->
       let left = extract_expression dagger f in
       let right = extract_expression dagger x in
-      let left_children = List.map (children f) (fun l ->
+      let left_children = List.map (children f) ~f:(fun l ->
           Application(l,right)) in
-      let right_children = List.map (children x) (fun r ->
+      let right_children = List.map (children x) ~f:(fun r ->
           Application(left,r)) in
       head_rewrites @ left_children @ right_children
-  in List.map (children j) (fun e -> (likelihood_option grammar request e, e)) |>
+  in List.map (children j) ~f:(fun e -> (likelihood_option grammar request e, e)) |>
      List.filter ~f:(compose is_some fst) |>
      List.map ~f:(fun (l,e) -> (insert_expression dagger e, get_some l))
 
@@ -134,7 +134,7 @@ let backward_enumerate dagger grammar rewrites size keep request i =
                   end);
       (if !number_of_cores = 1 then update_progress_bar bar (Set.length !closed));
       search ()
-  in List.filter (search ()) (not % (has_trivial_symmetry new_dagger) % fst) |>
+  in List.filter (search ()) ~f:(not % (has_trivial_symmetry new_dagger) % fst) |>
      Fn.flip List.take keep |>
      List.map ~f:(fun (j,l) -> (insert_expression dagger @@ extract_expression new_dagger j,l))
 

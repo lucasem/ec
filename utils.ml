@@ -23,7 +23,7 @@ let memorize f =
     | Some(y) -> y
     | None ->
       let y = f x in
-      ignore(Hashtbl.Poly.add table x y);
+      ignore(Hashtbl.Poly.add table ~key:x ~data:y);
       y
 
 let maximum_by ~cmp l =
@@ -81,12 +81,12 @@ let rec remove_duplicates l =
 
 let merge_a_list ls ~f:c =
   let merged = Hashtbl.Poly.create () in
-  List.iter ls (fun l ->
-      List.iter l (fun (tag,value) ->
+  List.iter ls ~f:(fun l ->
+      List.iter l ~f:(fun (tag,value) ->
           try
             let old_value = Hashtbl.find_exn merged tag in
-            Hashtbl.replace merged tag (c value old_value)
-          with Not_found -> ignore(Hashtbl.add merged tag value)
+            Hashtbl.set merged ~key:tag ~data:(c value old_value)
+          with Not_found -> ignore(Hashtbl.add merged ~key:tag ~data:value)
         )
     );
   Hashtbl.to_alist merged
@@ -131,7 +131,7 @@ let update_progress_bar bar new_progress =
   bar.current_progress <- new_progress;
   if new_dots > old_dots then
     let difference = min 80 (new_dots-old_dots) in
-    List.iter (1--difference) (fun _ -> print_char '.'; flush stdout)
+    List.iter (1--difference) ~f:(fun _ -> print_char '.'; flush stdout)
 
 (* paralleled map *)
 let pmap ?processes:(processes=4) ?bsize:(bsize=0) f input output =
@@ -157,7 +157,7 @@ let pmap ?processes:(processes=4) ?bsize:(bsize=0) f input output =
           Unix.close rd;
           let start_idx = !next_idx in
           let answer    = Array.init (end_idx start_idx - start_idx + 1)
-              (fun i -> f (input (i+start_idx))) in
+              ~f:(fun i -> f (input (i+start_idx))) in
           let chan = Unix.out_channel_of_descr wt in
           Marshal.to_channel chan (start_idx, answer) [Marshal.Closures];
           Out_channel.close chan;
@@ -180,7 +180,7 @@ let pmap ?processes:(processes=4) ?bsize:(bsize=0) f input output =
         and start_idx, answer = Marshal.from_channel chan in
         ignore (Unix.waitpid pid);
         In_channel.close chan;
-        Array.blit answer 0 output start_idx (Array.length answer);
+        Array.blit ~src:answer ~src_pos:0 ~dst:output ~dst_pos:start_idx ~len:(Array.length answer);
         total_computed := Array.length answer + !total_computed)
       recvs.read;
     in_streams := List.filter ~f:(fun (stream,_) -> not (List.mem recvs.read stream)) !in_streams;
@@ -218,7 +218,7 @@ let parallel_map l ~f =
   end
   else
     let input_array = Array.of_list l in
-    let output_array = Array.create (Array.length input_array) None in
+    let output_array = Array.create ~len:(Array.length input_array) None in
     let output_array =
       pmap ~processes:(min (Array.length input_array) !number_of_cores)
         (fun x -> Some(f x)) (Array.get input_array) output_array
@@ -305,18 +305,3 @@ let make_random_seeds n =
       if List.mem others r then seeds others m
           else seeds (r::others) (m-1)
   in seeds [] n
-
-
-(*
-let () =
-  let a =2. in
-  let b = 2. in
-  let samples = List.map (1--1000) ~f:(fun _ -> let (x,y) =(sample_gamma a 1.0,sample_gamma b 1.0) in
-                                        x/.(x+.y)) in
-  let mean = (List.fold_left ~init:0.0 ~f:(+.) samples /. 1000.0) in
-  let variance =List.fold_left ~init:0.0 ~f:(+.) (List.map samples ~f:(fun s -> (s-.mean)*.(s-.mean)))
-                /. 1000.0  in
-  Printf.printf "mean: %f\n" mean;
-  Printf.printf "variance: %f\n" variance;;
-*)
-
