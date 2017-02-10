@@ -1,5 +1,46 @@
 open Core.Std
 
+
+module C = struct
+  let _S = Library.c_S
+  let _B = Library.c_B
+  let _C = Library.c_C
+  let _I = Library.c_I
+  let _K = Library.c_K
+end;;
+
+module Lift = struct
+  let unary = Expression.lift_unary
+  let binary = Expression.lift_binary
+  let trinary = Expression.lift_trinary
+  let predicate = Expression.lift_predicate
+end;;
+
+module T = struct
+  type t = Type.tp = TID of int | TCon of string * t list
+  let i = Type.tint
+  let r = Type.treal
+  let arrow = Type.make_arrow
+end;;
+
+module Expr = struct
+  type e = Expression.expression = Terminal of string * T.t * unit ref | Application of e * e
+  let run q = Expression.run_expression_for_interval 0.02 q
+  let of_int n = Terminal(string_of_int n, T.TID(0), Obj.magic (ref n))
+end;;
+
+module Task = struct
+  type objective = Task.task_objective = LogLikelihood of (Expr.e -> float) | Seed of Expr.e
+  type t = Task.task = {
+    name : string;
+    task_type : T.t;
+    score : objective;
+    proposal : ((Expr.e -> float -> float) * (Expr.e*float) list) option;
+  }
+end;;
+
+
+
 let ec
     initial_primitives
     tasks
@@ -16,37 +57,31 @@ let ec
         lambda smoothing frontier_size tasks (!g)
   done;
   List.map ~f:(fun (e,(l,_)) -> (e,l)) (snd !g)
+;;
 
-module C = struct
-  let _S = Library.c_S
-  let _B = Library.c_B
-  let _C = Library.c_C
-  let _I = Library.c_I
-  let _plus = Library.c_plus
-  let _times = Library.c_times
-  let _zero = Library.c_zero
-  let _one = Library.c_one
-end;;
 
-module T = struct
-  type t = Type.tp = TID of int | TCon of string * t list
-  let i = Type.tint
-  let r = Type.treal
-  let arrow = Type.make_arrow
-end;;
+type 'a problem = { i: Expr.e; o: 'a }
+;;
 
-module Expr = struct
-  type e = Expression.expression = Terminal of string * T.t * unit ref | Application of e * e
-  let run q = Expression.run_expression_for_interval 0.02 q
-end;;
 
-module Task = struct
-  type objective = Task.task_objective = LogLikelihood of (Expr.e -> float) | Seed of Expr.e
-  type t = Task.task = {
-    name : string;
-    task_type : T.t;
-    score : objective;
-    proposal : ((Expr.e -> float -> float) * (Expr.e*float) list) option;
+let task_of_problems problems ~t ~name =
+  let single_score_func e p logl =
+    let q = Expr.Application(e, p.i) in
+    match Expr.run q with
+    | Some(r) when r = p.o -> logl
+    | _ -> Core.Std.Float.neg_infinity
+  in
+  let score_func = (fun (e : Expr.e) ->
+    let rec r y =
+      match y with
+      | [] -> 0.0
+      | (p::ps) -> single_score_func e p (r ps)
+    in r problems
+  ) in
+  Task.{
+    name = name;
+    task_type = t;
+    score = LogLikelihood(score_func);
+    proposal = None;
   }
-end;;
-
+;;
