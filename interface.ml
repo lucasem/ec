@@ -1,5 +1,22 @@
 open Core.Std
 
+(* EXPORTS:
+  * module Str    (* Core.Std.String *)
+  * module C      (* combinators *)
+  * module Lift   (* for expression terminal from function *)
+  * module T      (* types *)
+  * module Expr   (* expressions and running them *)
+  * module Task   (*** use problem (below) instead ***)
+  *
+  * ec initial_primitives tasks iterations ?lambda ?smoothing ?frontier_size ?log_prefix
+  *
+  * type 'a problem = { i: Expr.e; o: 'a }
+  * task_of_problems problems ~t ~name
+  *
+  * is_some
+  * get_some
+*)
+
 
 module Str = struct
   include Core.Std.String
@@ -48,7 +65,6 @@ module Task = struct
 end;;
 
 
-
 let ec
     initial_primitives
     tasks
@@ -93,3 +109,7 @@ let task_of_problems problems ~t ~name =
     proposal = None;
   }
 ;;
+
+
+let is_some = Utils.is_some
+let get_some = Utils.get_some
