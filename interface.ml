@@ -1,6 +1,10 @@
 open Core.Std
 
 
+module Str = struct
+  include Core.Std.String
+end;;
+
 module C = struct
   let _S = Library.c_S
   let _B = Library.c_B
@@ -13,6 +17,7 @@ module Lift = struct
   let unary = Expression.lift_unary
   let binary = Expression.lift_binary
   let trinary = Expression.lift_trinary
+  let quadinary = Expression.lift_quadinary
   let predicate = Expression.lift_predicate
 end;;
 
@@ -20,6 +25,8 @@ module T = struct
   type t = Type.tp = TID of int | TCon of string * t list
   let i = Type.tint
   let r = Type.treal
+  let s = Type.make_ground "string"
+  let ls = Type.make_ground "list of strings"
   let arrow = Type.make_arrow
 end;;
 
@@ -27,6 +34,7 @@ module Expr = struct
   type e = Expression.expression = Terminal of string * T.t * unit ref | Application of e * e
   let run q = Expression.run_expression_for_interval 0.02 q
   let of_int n = Terminal(string_of_int n, T.TID(0), Obj.magic (ref n))
+  let of_str s = Terminal(s, T.TID(0), Obj.magic (ref s))
 end;;
 
 module Task = struct
