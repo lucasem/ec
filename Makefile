@@ -3,7 +3,7 @@ C = corebuild
 default: main
 
 main:
-	$(C) -quiet main.native
+	$(C) -pkg yojson -quiet main.native
 
 run: main
 	$(RM) log/*

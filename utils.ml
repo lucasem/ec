@@ -1,5 +1,4 @@
 open Core.Std
-open Unix.Select_fds
 open Sys
 
 
@@ -176,12 +175,14 @@ let pmap ?processes:(processes=4) ?bsize:(bsize=0) f input output =
         ~write:[] ~except:[] ~timeout:`Never () in
     List.iter ~f:(fun descr ->
         let chan = Unix.in_channel_of_descr descr in
-        let pid = List.Assoc.find_exn !in_streams descr
-        and start_idx, answer = Marshal.from_channel chan in
-        ignore (Unix.waitpid pid);
-        In_channel.close chan;
-        Array.blit ~src:answer ~src_pos:0 ~dst:output ~dst_pos:start_idx ~len:(Array.length answer);
-        total_computed := Array.length answer + !total_computed)
+        let pid = List.Assoc.find_exn !in_streams descr in
+        let receive_answer () =
+          let start_idx, answer = Marshal.from_channel chan in
+          ignore (Unix.waitpid pid);
+          In_channel.close chan;
+          Array.blit ~src:answer ~src_pos:0 ~dst:output ~dst_pos:start_idx ~len:(Array.length answer);
+          total_computed := Array.length answer + !total_computed
+        in try receive_answer () with End_of_file -> Printf.printf "got EOF from child")
       recvs.read;
     in_streams := List.filter ~f:(fun (stream,_) -> not (List.mem recvs.read stream)) !in_streams;
   done;

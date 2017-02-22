@@ -2,7 +2,8 @@ open Core.Std
 
 (* EXPORTS:
   * module Str    (* Core.Std.String *)
-  * module C      (* combinators *)
+  * module List   (* Core.Std.List *)
+  * module C      (* combinators (primitive) *)
   * module Lift   (* for expression terminal from function *)
   * module T      (* types *)
   * module Expr   (* expressions and running them *)
@@ -22,12 +23,21 @@ module Str = struct
   include Core.Std.String
 end;;
 
+module List = struct
+  include Core.Std.List
+  let nth_or_default l i ?default:(default="") =
+    match List.nth l i with
+      | Some(x) -> x
+      | None -> default
+end;;
+
 module C = struct
   let _S = Library.c_S
   let _B = Library.c_B
   let _C = Library.c_C
   let _I = Library.c_I
   let _K = Library.c_K
+  let prims = [_S;_B;_C;_I;_K]
 end;;
 
 module Lift = struct
@@ -45,6 +55,7 @@ module T = struct
   let i = make "int"
   let r = make "real"
   let s = make "string"
+  let c = make "char"
 end;;
 
 module Expr = struct
