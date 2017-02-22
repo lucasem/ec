@@ -40,11 +40,11 @@ end;;
 
 module T = struct
   type t = Type.tp = TID of int | TCon of string * t list
-  let i = Type.tint
-  let r = Type.treal
-  let s = Type.make_ground "string"
-  let ls = Type.make_ground "list of strings"
+  let make = Type.make_ground
   let arrow = Type.make_arrow
+  let i = make "int"
+  let r = make "real"
+  let s = make "string"
 end;;
 
 module Expr = struct
