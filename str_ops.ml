@@ -12,7 +12,7 @@ let c_concat = Expr.Terminal("+", T.arrow T.s (T.arrow T.s T.s), Lift.binary (^)
 
 (* patterns & finding *)
 let c_find_char = Expr.Terminal("findchar", T.arrow T.s (T.arrow T.c T.i), Lift.binary Str.index)
-let c_char_spc   = Expr.Terminal("','", T.c, Obj.magic (ref ','))
+let c_char_spc   = Expr.Terminal("' '", T.c, Obj.magic (ref ' '))
 let c_char_comma = Expr.Terminal("','", T.c, Obj.magic (ref ','))
 let c_char_dot   = Expr.Terminal("'.'", T.c, Obj.magic (ref '.'))
 let c_char_at    = Expr.Terminal("'@'", T.c, Obj.magic (ref '@'))

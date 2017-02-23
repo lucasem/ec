@@ -9,7 +9,7 @@ open Core.Std
   * module Expr   (* expressions and running them *)
   * module Task   (*** use problem (below) instead ***)
   *
-  * ec initial_primitives tasks iterations ?lambda ?smoothing ?frontier_size ?log_prefix
+  * ec initial_primitives tasks iterations ?lambda ?smoothing ?frontier_size
   *
   * type 'a problem = { i: Expr.e; o: 'a }
   * task_of_problems problems ~t ~name
@@ -18,6 +18,9 @@ open Core.Std
   * get_some
 *)
 
+let is_some = Utils.is_some
+let get_some = Utils.get_some
+
 
 module Str = struct
   include Core.Std.String
@@ -25,7 +28,7 @@ end;;
 
 module List = struct
   include Core.Std.List
-  let nth_or_default l i ?default:(default="") =
+  let nth_or_default ?default:(default="" ) l i =
     match List.nth l i with
       | Some(x) -> x
       | None -> default
@@ -63,6 +66,7 @@ module Expr = struct
   let run q = Expression.run_expression_for_interval 0.02 q
   let of_int n = Terminal(string_of_int n, T.TID(0), Obj.magic (ref n))
   let of_str s = Terminal(s, T.TID(0), Obj.magic (ref s))
+  let to_str e = Expression.string_of_expression e
 end;;
 
 module Task = struct
@@ -79,19 +83,37 @@ end;;
 let ec
     initial_primitives
     tasks
+    ?lambda:(lambda=1.5)
+        (* this parameter controls how eager the system is to add new things to
+         * the grammar. Increase if you see over fitting and decrease if you
+         * see under fitting of grammar structure. *)
+    ?smoothing:(smoothing=1.0)
+        (* pseudo- counts for grammar parameter estimation. Increase if you see
+         * over fitting and decrease if you see under fitting of grammar
+         * parameters. *)
+    ?frontier_size:(frontier_size=10000)
+        (* how many programs to enumerate in each iteration of EC *)
     iterations
-    ?lambda:(lambda = 1.5) (* this parameter controls how eager the system is to add new things to the grammar. Increase if you see over fitting and decrease if you see under fitting of grammar structure. *)
-    ?smoothing:(smoothing = 1.0) (* pseudo- counts for grammar parameter estimation. Increase if you see over fitting and decrease if you see under fitting of grammar parameters. *)
-    ?frontier_size:(frontier_size = 10000) (* how many programs to enumerate in each iteration of EC *)
-    ?log_prefix:(log_prefix = "grammar")
   =
-  let g = ref (Library.make_flat_library initial_primitives) in
-  for i = 1 to iterations do
-    let ng, _ = Em.expectation_maximization_iteration ("log/"^log_prefix^string_of_int i)
+  let g = ref (Library.make_flat_library initial_primitives)
+  and p = ref (None)
+  and bic = ref (0.0) in
+  for _ = 1 to iterations do
+    let ng, np, nbic = Em.expectation_maximization_iteration
         lambda smoothing frontier_size tasks (!g) in
-    g := ng
+    g := ng;
+    p := Some(np);
+    bic := nbic
   done;
-  List.map ~f:(fun (e,(l,_)) -> (e,l)) (snd !g)
+  let grammar = List.map (snd !g) ~f:(fun (e,(l,_)) -> (Expr.to_str e,l))
+  and progs = get_some !p in
+  let hit_rate =
+    List.fold_left ~f:(+) ~init:0 @@ List.map progs
+      ~f:(fun (name, res) -> match res with
+        | Some(_) -> 1
+        | None    -> 0
+      ) in
+  grammar, progs, !bic, hit_rate
 ;;
 
 
@@ -120,7 +142,3 @@ let task_of_problems problems ~t ~name =
     proposal = None;
   }
 ;;
-
-
-let is_some = Utils.is_some
-let get_some = Utils.get_some

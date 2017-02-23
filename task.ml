@@ -43,11 +43,10 @@ let score_programs dagger frontiers tasks =
   let end_time = time() in
   scores
 
-let save_best_programs f dagger task_solutions =
-  let s = String.concat ~sep:"\n" @@ List.map task_solutions ~f:(fun (t,s) ->
-      if List.length s > 0
-      then let (e,p) = List.fold_left (List.tl_exn s) ~init:(List.hd_exn s) ~f:(fun (f,p) (g,q) ->
-          if p > q then (f,p) else (g,q))  in
-        Printf.sprintf "%s\t%s\t%f" t.name (string_of_expression @@ extract_expression dagger e) p
-    else Printf.sprintf "Missed %s" t.name)
-  in Out_channel.write_all f ~data:s
+let best_programs dagger task_solutions =
+  List.map task_solutions ~f:(fun (t,s) ->
+    if List.length s > 0 then
+      let (e,p) = List.fold_left (List.tl_exn s) ~init:(List.hd_exn s)
+        ~f:(fun (f,p) (g,q) -> if p > q then (f,p) else (g,q))  in
+      (t.name, Some((p, string_of_expression @@ extract_expression dagger e)))
+    else (t.name, None))

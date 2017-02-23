@@ -1,14 +1,17 @@
 C = corebuild
 
-default: main
+src := $(wildcard ./*.ml)
+entry = main.native
 
-main:
-	$(C) -pkg yojson -quiet main.native
 
-run: main
-	$(RM) log/*
-	./main.native flashfill.json
+default: ec
+
+ec: $(src)
+	$(C) -pkg yojson -quiet $(entry)
+	mv $(entry) ec
+
+run: ec
+	./ec flashfill.json | tee out.json
 
 clean:
-	$(RM) log/*
 	$(C) -clean

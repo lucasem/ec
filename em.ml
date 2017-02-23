@@ -71,7 +71,7 @@ let rec expectation_maximization_compress
 
 
 let expectation_maximization_iteration ?compression_tries:(compression_tries = 1)
-    prefix lambda smoothing ?application_smoothing:(application_smoothing = smoothing)
+    lambda smoothing ?application_smoothing:(application_smoothing = smoothing)
     ?da:(da = 0.1) (* dirichlet for random frontiers *)
     frontier_size tasks grammar =
   let (frontiers,dagger) = enumerate_frontiers_for_tasks grammar frontier_size tasks in
@@ -107,14 +107,12 @@ let expectation_maximization_iteration ?compression_tries:(compression_tries = 1
     expectation_maximization_compress lambda smoothing application_smoothing g0 dagger
       type_array requests candidates tasks fs) in
   let (final_grammar,_) = maximum_by ~cmp:(fun (_,a) (_,b) -> compare a b) candidate_grammars in
-  (* save the grammar *)
-  Out_channel.write_all (prefix^"_grammar") ~data:(string_of_library final_grammar);
-  (* save the best programs *)
-  let task_solutions = List.zip_exn tasks program_scores |> List.map ~f:(fun (t,solutions) ->
-      (t, List.map solutions ~f:(fun (i,s) ->
-           let e = extract_expression dagger i in
-           let error_message = "em_best: "^(string_of_expression e) in
-           (i,s+. (safe_get_some error_message @@ likelihood_option final_grammar t.task_type e))))) in
-  save_best_programs (prefix^"_programs") dagger task_solutions;
+  let task_solutions = List.zip_exn tasks program_scores |> List.map
+    ~f:(fun (t,solutions) -> (t, List.map solutions ~f:(fun (i,s) ->
+         let e = extract_expression dagger i in
+         let error_message = "em_best: "^(string_of_expression e) in
+         (i,s+. (safe_get_some error_message
+            @@ likelihood_option final_grammar t.task_type e))))) in
+  let progs = best_programs dagger task_solutions in
   let bic = bic_posterior_surrogate lambda dagger final_grammar task_solutions in
-  final_grammar, bic
+  final_grammar, progs, bic
