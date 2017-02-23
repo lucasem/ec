@@ -7,7 +7,7 @@ main:
 
 run: main
 	$(RM) log/*
-	./main.native | tee log/output
+	./main.native flashfill.json
 
 clean:
 	$(RM) log/*

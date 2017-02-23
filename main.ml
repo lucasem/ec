@@ -17,7 +17,11 @@ let load_tasks file =
   tasks
 
 let main () =
-  ec combs (load_tasks "flashfill.json") 16
+  if Array.length Sys.argv < 2 then begin
+    Printf.eprintf "Failure: must supply tasks file as argument\n";
+    exit 1
+  end;
+  ec combs (load_tasks Sys.argv.(1)) 16
   ~lambda:1.5
   ~smoothing:1.0
   ~frontier_size:1000
