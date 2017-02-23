@@ -41,7 +41,6 @@ let score_programs dagger frontiers tasks =
             let l = ll e in
             if is_valid l then Some((i,l)) else None)) in
   let end_time = time() in
-  Printf.printf "Scored programs in %f seconds." (end_time-.start_time); print_newline ();
   scores
 
 let save_best_programs f dagger task_solutions =

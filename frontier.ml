@@ -42,10 +42,6 @@ let make_frontiers size keep_size grammar tasks =
         let number_of_partial = List.length (List.filter ~f:(fun scores ->
             List.length scores > 0
           ) top_program_scores) in
-        Printf.printf "Hit %i / %i \n" number_hit (List.length top_tasks);
-        Printf.printf "Partial credit %i / %i" (number_of_partial-number_hit)
-          (List.length top_tasks);
-        print_newline ();
         (* dynamic program for likelihoods *)
         let requests = frontier_requests top_frontiers in
         let likelihoods = program_likelihoods grammar dagger (infer_graph_types dagger) requests in
@@ -58,18 +54,12 @@ let make_frontiers size keep_size grammar tasks =
     if List.is_empty (bottom_tasks)
     then []
     else begin
-      print_endline "Generating backward rewrites...";
       let rewrites = snd grammar |> List.map ~f:(fun (e,(_,t)) ->
           (* load primitives into the graph *)
           ignore(insert_expression dagger e);
           get_templates e t |> List.map ~f:(fun (target,template) ->
               (template,apply_template target))) |> List.concat in
-      print_endline "Generated rewrites, starting enumeration...";
       let graphs_and_frontiers = parallel_map bottom_tasks ~f:(fun t ->
-          if !number_of_cores = 1 then begin
-            Printf.printf "\nEnumerating (backwards) for %s..." t.name;
-            print_newline ();
-          end;
           let temp_dagger = make_expression_graph 10000 in
           let i = insert_expression temp_dagger @@ match t.score with
             | Seed(s) -> s
@@ -96,7 +86,7 @@ let make_frontiers size keep_size grammar tasks =
 
 
 (* spit out something that is similar to the posterior; *)
-let bic_posterior_surrogate ?print:(print = true) lambda dagger grammar task_solutions =
+let bic_posterior_surrogate ?print:(print = false) lambda dagger grammar task_solutions =
   let likelihood = List.fold_left task_solutions ~init:0. ~f:(fun l (t,f) ->
       if List.length f > 0
       then l +. lse_list (List.map f ~f:(fun (i,s) ->

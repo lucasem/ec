@@ -13,7 +13,7 @@ let minimum_occurrences = 2;; (* how many tasks a tree must occur in to make it 
 let candidate_ground_fragments dagger solutions =
   let candidates = reachable_expressions dagger @@ List.concat solutions in
   let can = Int.Set.elements candidates |> List.filter ~f:(compose not @@ is_leaf_ID dagger) in
-  Printf.printf "\nGot %i (ground) candidates." (List.length can); print_newline (); can
+  can
 
 
 
@@ -26,7 +26,6 @@ let candidate_ground_fragments dagger solutions =
    that grounded expression gets included as a fragment.
 *)
 let candidate_fragments dagger solutions =
-  print_string "Preparing for fragment merging..."; print_newline ();
   let terminals = List.filter (0--(expression_graph_size dagger - 1)) ~f:(is_leaf_ID dagger) in
   let valid_IDs = reachable_expressions dagger @@ List.concat solutions in
   let ground_pairs = 0--(expression_graph_size dagger - 1) |>
@@ -63,7 +62,6 @@ let candidate_fragments dagger solutions =
            if is_some q
            then [(t,get_some q,terminal_type @@ extract_expression dagger t)]
            else [])));
-  print_string "Done preparing."; print_newline ();
   let rec instantiate i =
     match Hashtbl.find instantiations i with
     | Some(z) -> z
@@ -101,4 +99,4 @@ let candidate_fragments dagger solutions =
         List.iter (instantiate i) ~f:(fun (j,_,_) ->
               candidates := Int.Set.add !candidates j));
   let can = Int.Set.elements !candidates |> List.filter ~f:(compose not @@ is_leaf_ID dagger) in
-  Printf.printf "\nGot %i candidates." (List.length can); print_newline (); can
+  can

@@ -58,11 +58,6 @@ let enumerate_bounded ?prune:(prune = do_not_prune) (* testing of expressions as
 let enumerate_ID ?prune:(prune = do_not_prune) dagger library t frontier_size =
   let rec iterate bound =
     let (indices, number_pruned) = enumerate_bounded ~prune dagger library t bound in
-    if !number_of_cores = 1 || List.length indices + number_pruned >= frontier_size then begin
-      Printf.printf "Type %s \t Bound %f \t  => %i (%i) / %i programs" (string_of_type t) bound
-        (List.length indices) (List.length indices + number_pruned) frontier_size;
-      print_newline ()
-    end;
     if List.length indices + number_pruned < frontier_size
     then iterate (bound+.0.5)
     else indices
@@ -76,7 +71,6 @@ let enumerate_frontiers_for_tasks grammar frontier_size tasks
   let start_time = time () in
   let (special_tasks,normal_tasks) = List.partition_tf tasks ~f:(fun t -> is_some @@ t.proposal) in
   let types = remove_duplicates (List.map tasks ~f:(fun t -> t.task_type)) in
-  Printf.printf "number of (normal) types: %i \n" (List.length types);
   let dagger = make_expression_graph 100000 in
   let indices = List.map types ~f:(fun t ->
       if always_sampled_prior || not (List.is_empty normal_tasks)
@@ -85,7 +79,6 @@ let enumerate_frontiers_for_tasks grammar frontier_size tasks
   let special_indices =
     let parallel_results = parallel_map special_tasks ~f:(fun t ->
         let dagger = make_expression_graph 10000 in
-        Printf.printf "Enumerating for task \"%s\"" t.name; print_newline ();
         let special_grammar = modify_grammar grammar t in
         let l = task_likelihood t in
         let prune j = not @@ is_valid @@ l j in
@@ -97,8 +90,6 @@ let enumerate_frontiers_for_tasks grammar frontier_size tasks
       dirty_graph d;
       (t,Int.Set.map i ~f:(insert_expression dagger % extract_expression d))) in
   let end_time = time () in
-  Printf.printf "Enumerated all programs in %f seconds." (end_time-.start_time);
-  print_newline ();
   let start_time = time() in
   let indices = List.zip_exn types @@
     List.map indices ~f:(fun iDs ->
@@ -112,8 +103,6 @@ let enumerate_frontiers_for_tasks grammar frontier_size tasks
                            List.fold_left ~f:Int.Set.union ~init:Int.Set.empty |>
                            Int.Set.length in
   let end_time = time() in
-  Printf.printf "Coalesced %i programs in %f seconds." number_of_programs (end_time-.start_time);
-  print_newline ();
   (indices |> List.map ~f:(fun (t,s) -> (t,Int.Set.to_list s)), dagger)
 
 (* computes likelihood of MAP parse *)

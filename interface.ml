@@ -83,13 +83,13 @@ let ec
     ?lambda:(lambda = 1.5) (* this parameter controls how eager the system is to add new things to the grammar. Increase if you see over fitting and decrease if you see under fitting of grammar structure. *)
     ?smoothing:(smoothing = 1.0) (* pseudo- counts for grammar parameter estimation. Increase if you see over fitting and decrease if you see under fitting of grammar parameters. *)
     ?frontier_size:(frontier_size = 10000) (* how many programs to enumerate in each iteration of EC *)
-    ?log_prefix:(log_prefix = "grammar") (* grammars will be logged under log/LOGPREFIXlog_iteration *)
+    ?log_prefix:(log_prefix = "grammar")
   =
   let g = ref (Library.make_flat_library initial_primitives) in
   for i = 1 to iterations do
-    Printf.printf "\n \n \n Iteration %i \n" i;
-    g := Em.expectation_maximization_iteration ("log/"^log_prefix^string_of_int i)
-        lambda smoothing frontier_size tasks (!g)
+    let ng, _ = Em.expectation_maximization_iteration ("log/"^log_prefix^string_of_int i)
+        lambda smoothing frontier_size tasks (!g) in
+    g := ng
   done;
   List.map ~f:(fun (e,(l,_)) -> (e,l)) (snd !g)
 ;;

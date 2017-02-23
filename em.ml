@@ -75,17 +75,7 @@ let expectation_maximization_iteration ?compression_tries:(compression_tries = 1
     ?da:(da = 0.1) (* dirichlet for random frontiers *)
     frontier_size tasks grammar =
   let (frontiers,dagger) = enumerate_frontiers_for_tasks grammar frontier_size tasks in
-  print_string "Scoring programs... \n";
   let program_scores = score_programs dagger frontiers tasks in
-  (* display the hit rate *)
-  let number_hit = List.length (List.filter ~f:(fun scores ->
-      List.exists scores ~f:(fun (_,s) -> s > log (0.999))
-    ) program_scores) in
-  let number_of_partial = List.length (List.filter ~f:(fun scores ->
-      List.length scores > 0
-    ) program_scores) in
-  Printf.printf "Hit %i / %i \n" number_hit (List.length tasks);
-  Printf.printf "Partial credit %i / %i \n" (number_of_partial-number_hit) (List.length tasks);
   (* compute likelihoods under grammar and then normalize the frontiers *)
   let type_array = infer_graph_types dagger in
   let requests = frontier_requests frontiers in
@@ -119,7 +109,6 @@ let expectation_maximization_iteration ?compression_tries:(compression_tries = 1
   let (final_grammar,_) = maximum_by ~cmp:(fun (_,a) (_,b) -> compare a b) candidate_grammars in
   (* save the grammar *)
   Out_channel.write_all (prefix^"_grammar") ~data:(string_of_library final_grammar);
-  print_newline ();
   (* save the best programs *)
   let task_solutions = List.zip_exn tasks program_scores |> List.map ~f:(fun (t,solutions) ->
       (t, List.map solutions ~f:(fun (i,s) ->
@@ -127,5 +116,5 @@ let expectation_maximization_iteration ?compression_tries:(compression_tries = 1
            let error_message = "em_best: "^(string_of_expression e) in
            (i,s+. (safe_get_some error_message @@ likelihood_option final_grammar t.task_type e))))) in
   save_best_programs (prefix^"_programs") dagger task_solutions;
-  ignore(bic_posterior_surrogate lambda dagger final_grammar task_solutions);
-  final_grammar
+  let bic = bic_posterior_surrogate lambda dagger final_grammar task_solutions in
+  final_grammar, bic

@@ -113,8 +113,6 @@ let time () = Time.to_float @@ Time.now ()
 let time_it description callback =
   let start_time = time () in
   let return_value = callback () in
-  Printf.printf "%s in %f seconds." description (Time.to_float (Time.now ()) -. start_time);
-  print_newline ();
   return_value
 
 (* progress bar *)
@@ -130,12 +128,12 @@ let update_progress_bar bar new_progress =
   bar.current_progress <- new_progress;
   if new_dots > old_dots then
     let difference = min 80 (new_dots-old_dots) in
-    List.iter (1--difference) ~f:(fun _ -> print_char '.'; flush stdout)
+    List.iter (1--difference) ~f:(fun _ -> Printf.eprintf "%c" '.'; flush stderr)
 
 (* paralleled map *)
 let pmap ?processes:(processes=4) ?bsize:(bsize=0) f input output =
   if processes = 0 then begin
-        Printf.printf "WARNING: processes = 0\n"; flush stdout
+        Printf.eprintf "WARNING: processes = 0\n"; flush stderr
   end ;
   let bsize = match bsize with
     | 0 -> Array.length output / processes
@@ -182,7 +180,7 @@ let pmap ?processes:(processes=4) ?bsize:(bsize=0) f input output =
           In_channel.close chan;
           Array.blit ~src:answer ~src_pos:0 ~dst:output ~dst_pos:start_idx ~len:(Array.length answer);
           total_computed := Array.length answer + !total_computed
-        in try receive_answer () with End_of_file -> Printf.printf "got EOF from child")
+        in try receive_answer () with End_of_file -> Printf.eprintf "got EOF from child")
       recvs.read;
     in_streams := List.filter ~f:(fun (stream,_) -> not (List.mem recvs.read stream)) !in_streams;
   done;
@@ -209,14 +207,10 @@ let parallel_map l ~f =
   if not !counted_CPUs
   then begin
     number_of_cores := cpu_count ();
-    Printf.printf "Counted %i CPUs" !number_of_cores; print_newline ();
     counted_CPUs := true
   end;
   if 1 = !number_of_cores || List.length l < 2
-  then begin
-    Printf.printf "Skipping parallelism"; print_newline ();
-    List.map l ~f:f
-  end
+  then List.map l ~f:f
   else
     let input_array = Array.of_list l in
     let output_array = Array.create ~len:(Array.length input_array) None in
@@ -260,9 +254,11 @@ let normal s m =
   in
   s *. n +. m
 
-let print_arguments () =
+let print_arguments () = ()
+  (* NOOP
   Array.iter Sys.argv ~f:(fun a -> Printf.printf "%s " a);
   print_newline ()
+  *)
 
 (* samplers adapted from gsl *)
 let rec uniform_positive () =
