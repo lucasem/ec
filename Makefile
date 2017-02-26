@@ -8,7 +8,8 @@ default: ec
 
 ec: $(src)
 	$(C) -pkg yojson -quiet $(entry)
-	mv $(entry) ec
+	cp `readlink $(entry)` ec
+	$(RM) $(entry)
 
 run: ec
 	./ec flashfill.json | tee out.json
