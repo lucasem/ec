@@ -23,7 +23,7 @@ let load_json file =
 let json_of_ec_results grammar progs bic hit_rate =
   let open Yojson.Basic in
   let json_grammar = `List (List.map grammar ~f:(fun (e,l) ->
-    `Assoc [ ("expr", `String e); ("likelihood", `Float l) ]))
+    `Assoc [ ("expr", `String e); ("log_likelihood", `Float l) ]))
   and json_progs = `List (List.map progs ~f:(fun (name, res) ->
     `Assoc [ ("task", `String name); ("result",
       match res with
@@ -35,7 +35,7 @@ let json_of_ec_results grammar progs bic hit_rate =
   `Assoc [
     ("grammar", json_grammar);
     ("programs", json_progs);
-    ("bic", `Float (exp bic));
+    ("log_bic", `Float bic);
     ("hit_rate", `Int hit_rate);
   ]
 
