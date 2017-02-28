@@ -1,8 +1,8 @@
 open Interface
 
-let combs = C.prims @ Str_ops.combs
+let prim_combs = C.prims @ Str_ops.combs
 
-let load_tasks file =
+let load_json file =
   let open Yojson.Basic.Util in
   let deserialize_problem json_p =
     { i=json_p |> member "i" |> to_string |> Expr.of_str;
@@ -11,10 +11,14 @@ let load_tasks file =
   let deserialize_task json_t =
     task_of_problems ~t:(T.arrow T.s T.s) ~name:(json_t |> member "name" |> to_string)
       @@ deserialize_problems (json_t |> member "problems" |> to_list) in
+  let deserialize_comb json_c = Expr.unmarshal (json_c |> member "expr" |> to_string) in
   let json = Yojson.Basic.from_file file in
-  let json_tasks = json |> member "tasks" |> to_list in
-  let tasks = List.map json_tasks ~f:deserialize_task in
-  tasks
+  let json_tasks = json |> member "tasks" |> to_list
+  and json_combs = json |> member "grammar" |> to_list in
+  let tasks = List.map json_tasks ~f:deserialize_task
+  and combs = List.map json_combs ~f:deserialize_comb in
+  let combs = List.dedup (prim_combs @ combs) in
+  tasks, combs
 
 let json_of_ec_results grammar progs bic hit_rate =
   let open Yojson.Basic in
@@ -40,8 +44,9 @@ let main () =
     Printf.eprintf "Failure: must supply tasks file as argument\n";
     exit 1
   end;
+  let tasks, combs = load_json Sys.argv.(1) in
   let grammar, progs, bic, hit_rate =
-    ec combs (load_tasks Sys.argv.(1)) 4
+    ec combs tasks 4
     ~lambda:1.5
     ~smoothing:1.0
     ~frontier_size:1000 in

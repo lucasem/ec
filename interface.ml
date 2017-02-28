@@ -67,6 +67,7 @@ module Expr = struct
   let of_int n = Terminal(string_of_int n, T.TID(0), Obj.magic (ref n))
   let of_str s = Terminal(s, T.TID(0), Obj.magic (ref s))
   let to_str e = Expression.string_of_expression e
+  let unmarshal = Library.expression_of_string
 end;;
 
 module Task = struct
@@ -109,7 +110,7 @@ let ec
   and progs = get_some !p in
   let hit_rate =
     List.fold_left ~f:(+) ~init:0 @@ List.map progs
-      ~f:(fun (name, res) -> match res with
+      ~f:(fun (_, res) -> match res with
         | Some(_) -> 1
         | None    -> 0
       ) in

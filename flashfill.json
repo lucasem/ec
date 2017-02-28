@@ -1,4 +1,5 @@
-{ "tasks": [
+{ "grammar": [],
+  "tasks": [
   { "problems": [
     { "i":"test", "o":"TEST" },
     { "i":"tests", "o":"TESTS" },
