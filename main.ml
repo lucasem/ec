@@ -11,7 +11,7 @@ let load_json file =
   let deserialize_task json_t =
     task_of_problems ~t:(T.arrow T.s T.s) ~name:(json_t |> member "name" |> to_string)
       @@ deserialize_problems (json_t |> member "problems" |> to_list) in
-  let deserialize_comb json_c = Expr.unmarshal (json_c |> member "expr" |> to_string) in
+  let deserialize_comb json_c = Expr.unmarshal (json_c |> member "expr" |> to_string) prim_combs in
   let json = Yojson.Basic.from_file file in
   let json_tasks = json |> member "tasks" |> to_list
   and json_combs = json |> member "grammar" |> to_list in
@@ -29,13 +29,16 @@ let json_of_ec_results grammar progs bic hit_rate =
       match res with
         | None -> `Null
         | Some((p, e)) -> `Assoc [
-          ("probability", `Float (exp p));
+          ("log_probability", `Float p);
           ("expr", `String e) ]
     )])) in
   `Assoc [
     ("grammar", json_grammar);
     ("programs", json_progs);
-    ("log_bic", `Float bic);
+    ("log_bic", match (classify_float bic) with
+      | FP_infinite -> `Null
+      | FP_nan -> `Null
+      | _ ->  `Float bic);
     ("hit_rate", `Int hit_rate);
   ]
 
@@ -46,10 +49,7 @@ let main () =
   end;
   let tasks, combs = load_json Sys.argv.(1) in
   let grammar, progs, bic, hit_rate =
-    ec combs tasks 4
-    ~lambda:1.5
-    ~smoothing:1.0
-    ~frontier_size:1000 in
+    ec combs tasks 4 ~lambda:0.8 ~frontier_size:4000 in
   Yojson.Basic.pretty_to_channel stdout
     @@ json_of_ec_results grammar progs bic hit_rate
 ;;

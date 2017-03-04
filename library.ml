@@ -348,9 +348,8 @@ let dirty_graph (i2n,n2i,_) =
     Hashtbl.remove n2i c;
     ignore(Hashtbl.add n2i ~key:d ~data:i))
 
-
-(* parses an expression. has to be in library because needs definitions of terminals *)
-let expression_of_string s =
+let expression_of_string_with_combs s combs =
+  let all_terminals = ref (List.map combs ~f:(fun e -> (string_of_expression e,e))) in
   let i = ref 0 in
   let rec read () =
     if !i < String.length s
@@ -374,6 +373,13 @@ let expression_of_string s =
                 with _ -> raise (Failure ("not in all_terminals: "^name))))
     else raise (Failure ("expression_of_string: "^s))
   in read ()
+
+(* parses an expression. has to be in library because needs definitions of terminals *)
+let expression_of_string s = expression_of_string_with_combs s (
+  [c_K;c_S;c_B;c_C;c_I;c_bottom;
+  c_sin;c_cos;c_times_dot;c_plus_dot;c_plus;c_times;c_inner_product;
+  c_null;c_append;c_rcons;c_cons;c_append1;c_last_one;c_exists;c_car;c_cdr;]
+  @ c_numbers @ c_reals)
 
 let load_library f =
   let i = open_in f in

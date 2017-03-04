@@ -56,7 +56,6 @@ module T = struct
   let make = Type.make_ground
   let arrow = Type.make_arrow
   let i = make "int"
-  let r = make "real"
   let s = make "string"
   let c = make "char"
 end;;
@@ -64,10 +63,10 @@ end;;
 module Expr = struct
   type e = Expression.expression = Terminal of string * T.t * unit ref | Application of e * e
   let run q = Expression.run_expression_for_interval 0.02 q
-  let of_int n = Terminal(string_of_int n, T.TID(0), Obj.magic (ref n))
-  let of_str s = Terminal(s, T.TID(0), Obj.magic (ref s))
+  let of_int n = Terminal(string_of_int n, T.i, Obj.magic (ref n))
+  let of_str s = Terminal(s, T.s, Obj.magic (ref s))
   let to_str e = Expression.string_of_expression e
-  let unmarshal = Library.expression_of_string
+  let unmarshal prims = Library.expression_of_string_with_combs prims
 end;;
 
 module Task = struct

@@ -51,8 +51,8 @@ list is an object with two fields, `task` (string) and `result` (null/obj),
 corresponding to the task name and its results. `result` is null if the task
 failed, or (on success) an object with `probability` (float) and `expr`
 (string) fields, where `expr` is the string representation of the combinator
-that solved the task and `probability` is its associated probability. Here's
-a simple example:
+that solved the task and `log_probability` is its associated
+log-probability. `log_bic` will be null if infinite. Here's a simple example:
 ```json
 {
   "grammar": [
@@ -74,14 +74,14 @@ a simple example:
     {
       "task": "IaN -> Ian",
       "result": {
-        "probability": 0.0010473575620008355,
+        "log_probability": -6.86148489441,
         "expr": "((B cap) lower)"
       }
     },
     {
       "task": "IaN RoDny -> Ian Rodny",
       "result": {
-        "probability": 1.416059563473085e-05,
+        "log_probability": -11.165047406,
         "expr": "((C feach) ((B cap) lower))"
       }
     }
@@ -89,5 +89,4 @@ a simple example:
   "log_bic": -4.77051e-8,
   "hit_rate": 6
 }
-
 ```
