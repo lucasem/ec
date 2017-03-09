@@ -49,7 +49,7 @@ let main () =
   end;
   let tasks, combs = load_json Sys.argv.(1) in
   let grammar, progs, bic, hit_rate =
-    ec combs tasks 8 ~lambda:0.8 ~frontier_size:2000 in
+    ec combs tasks 4 ~lambda:0.8 ~frontier_size:2000 in
   Yojson.Basic.pretty_to_channel stdout
     @@ json_of_ec_results grammar progs bic hit_rate
 ;;

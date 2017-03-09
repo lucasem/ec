@@ -16,7 +16,7 @@ let c_cc    = Expr.Terminal("cc", T.arrow T.s T.i, Lift.unary Str.length)
 let c_string_of_int  = Expr.Terminal("string-of-int", T.arrow T.i T.s, Lift.unary string_of_int)
 
 (* patterns & finding *)
-let c_find_char  = Expr.Terminal("findchar", T.arrow T.s (T.arrow T.c T.i), Lift.binary (fun s c->
+let c_find_char  = Expr.Terminal("findchar", T.arrow T.c (T.arrow T.s T.i), Lift.binary (fun c s->
   match Str.index s c with
     | Some(i) -> i
     | None -> Str.length s))
@@ -29,48 +29,50 @@ let c_char_rang  = Expr.Terminal("<GREATER-THAN>", T.c, Obj.magic (ref '>'))
 let c_string_of_char = Expr.Terminal("string-of-char", T.arrow T.c T.s, Lift.unary (fun c->String.make 1 c))
 
 (* advanced string ops *)
-let substr s i j =
-  let i = i + (if i<0 then Str.length s else 0) in
-  let j = j + (if j<0 then Str.length s else 0) in
+let substr i j s =
+  let i = i + (if i<0 then Str.length s else 0)
+  and j = j + (if j<0 then Str.length s else 0) in
   Str.sub s ~pos:i ~len:(j - i)
-let c_substr = Expr.Terminal("substr", T.arrow T.s (T.arrow T.i (T.arrow T.i T.s)), Lift.trinary substr)
+let c_substr = Expr.Terminal("substr", T.arrow T.i (T.arrow T.i (T.arrow T.s T.s)), Lift.trinary substr)
 
-let replace s t i =
-  let i = i + (if i<0 then Str.length s else 0) in
-  let left  = Str.sub s ~pos:0 ~len:(i-1)
-  and right = Str.sub s ~pos:(i+1) ~len:((Str.length s)-(i+1))
+let replace_substr_first t p s = Str.substr_replace_first ~with_:t ~pattern:p s
+let c_replace_substr_first = Expr.Terminal("replace-substr-first", T.arrow T.s (T.arrow T.s (T.arrow T.s T.s)), Lift.trinary replace_substr_first)
+
+let replace_substr_all t p s = Str.substr_replace_all ~with_:t ~pattern:p s
+let c_replace_substr_all = Expr.Terminal("replace-substr-all", T.arrow T.s (T.arrow T.s (T.arrow T.s T.s)), Lift.trinary replace_substr_all)
+
+let replace t i j s =
+  let i = i + (if i<0 then Str.length s else 0)
+  and j = j + (if j<0 then Str.length s else 0) in
+  let left  = Str.sub s ~pos:0 ~len:i
+  and right = Str.sub s ~pos:j ~len:((Str.length s)-(j+1))
   in left^t^right
-let c_replace = Expr.Terminal("replace-index", T.arrow T.s (T.arrow T.s (T.arrow T.i T.s)), Lift.trinary replace)
+let c_replace = Expr.Terminal("replace", T.arrow T.s (T.arrow T.i (T.arrow T.i (T.arrow T.s T.s))), Lift.quadinary replace)
 
-let replace_all s t c =
-  let parts = Str.split s ~on:c in
-  List.fold (List.tl_exn parts) ~init:(List.hd_exn parts) ~f:(fun a b->a^t^b)
-let c_replace_all = Expr.Terminal("replace-all", T.arrow T.s (T.arrow T.s (T.arrow T.c T.s)), Lift.trinary replace_all)
-
-let nth s i =
+let nth i s =
   let parts = Str.split ~on:' ' s in
   let i = i + (if i<0 then List.length parts else 0) in
   List.nth_or_default (Str.split s ~on:' ') i
-let c_nth = Expr.Terminal("nth", T.arrow T.s (T.arrow T.i T.s), Lift.binary nth)
+let c_nth = Expr.Terminal("nth", T.arrow T.i (T.arrow T.s T.s), Lift.binary nth)
 
-let fnth s i f =
+let fnth f i s =
   let parts = Str.split ~on:' ' s in
   let i = i + (if i<0 then List.length parts else 0) in
   let newParts = List.mapi ~f:(fun j v -> if j == i then f (Some(v)) else Some(v)) parts in
   let unpackedParts = if List.for_all newParts ~f:is_some then List.map newParts ~f:get_some else parts in
   Str.concat ~sep:" " unpackedParts
-let c_fnth = Expr.Terminal("fnth", T.arrow T.s (T.arrow T.i (T.arrow (T.arrow T.s T.s) T.s)), Lift.trinary fnth)
+let c_fnth = Expr.Terminal("fnth", T.arrow (T.arrow T.s T.s) (T.arrow T.i (T.arrow T.s T.s)), Lift.trinary fnth)
 
-let feach s f =
+let feach f s =
   let parts = Str.split ~on:' ' s in
   let newParts = List.mapi ~f:(fun _ v -> f (Some(v))) parts in
   let unpackedParts = if List.for_all newParts ~f:is_some then List.map newParts ~f:get_some else parts in
   Str.concat ~sep:" " unpackedParts
-let c_feach = Expr.Terminal("feach", T.arrow T.s (T.arrow (T.arrow T.s T.s) T.s), Lift.binary feach)
+let c_feach = Expr.Terminal("feach", T.arrow (T.arrow T.s T.s) (T.arrow T.s T.s), Lift.binary feach)
 
 let combs = [
   c_empty;c_up;c_low;c_cap;c_concat;
   c_zero;c_incr;c_decr;c_wc;c_cc;c_string_of_int;
   c_find_char;c_char_spc;c_char_comma;c_char_dot;c_char_at;c_char_lang;c_char_rang;c_string_of_char;
-  c_substr;c_replace;c_replace_all;c_nth;c_fnth;c_feach
+  c_substr;c_replace;c_replace_substr_first;c_replace_substr_all;c_nth;c_fnth;c_feach
 ]
