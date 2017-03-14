@@ -29,10 +29,12 @@ let c_char_rang  = Expr.Terminal("<GREATER-THAN>", T.c, Obj.magic (ref '>'))
 let c_string_of_char = Expr.Terminal("string-of-char", T.arrow T.c T.s, Lift.unary (fun c->String.make 1 c))
 
 (* advanced string ops *)
+let c_is = Expr.Terminal("is", T.arrow T.s (T.arrow T.s T.b), Lift.binary (=))
+
 let substr i j s =
   let i = i + (if i<0 then Str.length s else 0)
-  and j = j + (if j<0 then Str.length s else 0) in
-  Str.sub s ~pos:i ~len:(j - i)
+  and j = j + (if j<0 then Str.length s else 0)
+  in Str.sub s ~pos:i ~len:(j - i)
 let c_substr = Expr.Terminal("substr", T.arrow T.i (T.arrow T.i (T.arrow T.s T.s)), Lift.trinary substr)
 
 let replace_substr_first t p s = Str.substr_replace_first ~with_:t ~pattern:p s
@@ -51,28 +53,34 @@ let c_replace = Expr.Terminal("replace", T.arrow T.s (T.arrow T.i (T.arrow T.i (
 
 let nth i s =
   let parts = Str.split ~on:' ' s in
-  let i = i + (if i<0 then List.length parts else 0) in
-  List.nth_or_default (Str.split s ~on:' ') i
+  let i = i + (if i<0 then List.length parts else 0)
+  in List.nth_or_default (Str.split s ~on:' ') i
 let c_nth = Expr.Terminal("nth", T.arrow T.i (T.arrow T.s T.s), Lift.binary nth)
 
 let fnth f i s =
   let parts = Str.split ~on:' ' s in
   let i = i + (if i<0 then List.length parts else 0) in
   let newParts = List.mapi ~f:(fun j v -> if j == i then f (Some(v)) else Some(v)) parts in
-  let unpackedParts = if List.for_all newParts ~f:is_some then List.map newParts ~f:get_some else parts in
-  Str.concat ~sep:" " unpackedParts
+  let unpackedParts = if List.for_all newParts ~f:is_some then List.map newParts ~f:get_some else parts
+  in Str.concat ~sep:" " unpackedParts
 let c_fnth = Expr.Terminal("fnth", T.arrow (T.arrow T.s T.s) (T.arrow T.i (T.arrow T.s T.s)), Lift.trinary fnth)
 
 let feach f s =
   let parts = Str.split ~on:' ' s in
   let newParts = List.mapi ~f:(fun _ v -> f (Some(v))) parts in
-  let unpackedParts = if List.for_all newParts ~f:is_some then List.map newParts ~f:get_some else parts in
-  Str.concat ~sep:" " unpackedParts
+  let unpackedParts = if List.for_all newParts ~f:is_some then List.map newParts ~f:get_some else parts
+  in Str.concat ~sep:" " unpackedParts
 let c_feach = Expr.Terminal("feach", T.arrow (T.arrow T.s T.s) (T.arrow T.s T.s), Lift.binary feach)
+
+let filter_words f s =
+  let parts = Str.split ~on:' ' s in
+  let newParts = List.filter ~f:(fun v -> get_some (f (Some(v)))) parts
+  in Str.concat ~sep:" " newParts
+let c_filter_words = Expr.Terminal("filter-words", T.arrow (T.arrow T.s T.b) (T.arrow T.s T.s), Lift.binary filter_words)
 
 let combs = [
   c_empty;c_up;c_low;c_cap;c_concat;
   c_zero;c_incr;c_decr;c_wc;c_cc;c_string_of_int;
   c_find_char;c_char_spc;c_char_comma;c_char_dot;c_char_at;c_char_lang;c_char_rang;c_string_of_char;
-  c_substr;c_replace;c_replace_substr_first;c_replace_substr_all;c_nth;c_fnth;c_feach
+  c_is;c_substr;c_replace_substr_first;c_replace_substr_all;c_replace;c_nth;c_fnth;c_feach;c_filter_words
 ]

@@ -53,4 +53,6 @@ let main () =
   Yojson.Basic.pretty_to_channel stdout
     @@ json_of_ec_results grammar progs bic hit_rate
 ;;
+
 main ();;
+

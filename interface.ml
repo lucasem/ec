@@ -56,6 +56,7 @@ module T = struct
   let make = Type.make_ground
   let arrow = Type.make_arrow
   let i = make "int"
+  let b = make "bool"
   let s = make "string"
   let c = make "char"
 end;;
