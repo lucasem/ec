@@ -90,3 +90,8 @@ log-probability. `log_bic` will be null if infinite. Here's a simple example:
   "hit_rate": 6
 }
 ```
+
+# Mini
+
+A convience build `make mini`, corresponding to [`./mini.ml`](./mini.ml),
+helps to quickly test and use expressions.

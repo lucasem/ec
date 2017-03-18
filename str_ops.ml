@@ -33,7 +33,7 @@ let c_is = Expr.Terminal("is", T.arrow T.s (T.arrow T.s T.b), Lift.binary (=))
 
 let substr i j s =
   let i = i + (if i<0 then Str.length s else 0)
-  and j = j + (if j<0 then Str.length s else 0)
+  and j = j + (if j<0 then 1 + Str.length s else 0) (* substr 0 -1 is identity *)
   in Str.sub s ~pos:i ~len:(j - i)
 let c_substr = Expr.Terminal("substr", T.arrow T.i (T.arrow T.i (T.arrow T.s T.s)), Lift.trinary substr)
 
