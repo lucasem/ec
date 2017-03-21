@@ -88,6 +88,8 @@ let ec
         (* this parameter controls how eager the system is to add new things to
          * the grammar. Increase if you see over fitting and decrease if you
          * see under fitting of grammar structure. *)
+    ?lambda_final:(lambda_final=lambda)
+        (* same as lambda, but only applies to the final iteration. *)
     ?smoothing:(smoothing=1.0)
         (* pseudo- counts for grammar parameter estimation. Increase if you see
          * over fitting and decrease if you see under fitting of grammar
@@ -99,9 +101,10 @@ let ec
   let g = ref (Library.make_flat_library initial_primitives)
   and p = ref (None)
   and bic = ref (0.0) in
-  for _ = 1 to iterations do
+  for it = 1 to iterations do
+    let l = if it < iterations then lambda else lambda_final in
     let ng, np, nbic = Em.expectation_maximization_iteration
-        lambda smoothing frontier_size tasks (!g) in
+        l smoothing frontier_size tasks (!g) in
     g := ng;
     p := Some(np);
     bic := nbic
