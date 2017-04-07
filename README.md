@@ -22,37 +22,39 @@ results are formatted in json and sent to stdout.
 The input json must possess `grammar` and `tasks` fields which are lists.
 Each item in the `grammar` list is an object with a single field, `expr`,
 that points to a string representing a combinator. Each item in the `tasks`
-list is an object with a single field, `problems`, that points to an array
-of problems which must be satisfied by the same learned program. These
-problems are objects with two string fields, `i` and `o` corresponding to
-input and output for the program. Here's a simple example:
+list is an object with three fields: a unique `name`, and `test` and `train`
+which point to arrays of problems which must be satisfied by the same
+learned program. These problems are objects with two string fields, `i` and
+`o` corresponding to input and output for the program. Here's a simple
+example:
 ```json
 { "grammar": [
     { "expr":"(C nth)" },
-    { "expr":"((B cap) lower)" }
-  ],
+    { "expr":"((B cap) lower)" } ],
   "tasks": [
-    { "problems": [
-      { "i":"test", "o":"tests" },
-      { "i":"tree", "o":"trees" },
-      { "i":"chair", "o":"chairs" }
-    ]}
+    { "name": "append s",
+      "train": [
+        { "i":"test", "o":"tests" } ],
+      "test": [
+        { "i":"tree", "o":"trees" },
+        { "i":"chair", "o":"chairs" } ] }
   ]
 }
 ```
 
 ### Output
-The output json has four fields: `grammar` (list), `programs` (list),
-`log_bic` (float), and `hit_rate` (integer). Each item in the `grammar` list
-is an object with two fields, `expr` (string) and `log_likelihood` (float),
-corresponding to a string representation of a combinator and its associated
-log-likelihood according to the given task set. Each item in the `programs`
-list is an object with two fields, `task` (string) and `result` (null/obj),
+The output json has four fields: `grammar` (list), `programs` (list), and
+`hit_rate` (integer). Each item in the `grammar` list is an object with two
+fields, `expr` (string) and `log_likelihood` (float), corresponding to a
+string representation of a combinator and its associated log-likelihood
+according to the given task set. Each item in the `programs` list is an
+object with two fields, `task` (string) and `result` (null/obj),
 corresponding to the task name and its results. `result` is null if the task
-failed, or (on success) an object with `probability` (float) and `expr`
-(string) fields, where `expr` is the string representation of the combinator
-that solved the task and `log_probability` is its associated
-log-probability. `log_bic` will be null if infinite. Here's a simple example:
+failed in either the train or both train and test problem sets, or (on
+success) an object with `probability` (float) and `expr` (string) fields,
+where `expr` is the string representation of the combinator that solved the
+task and `log_probability` is its associated log-probability. Here's a
+simple example:
 ```json
 {
   "grammar": [
@@ -86,7 +88,6 @@ log-probability. `log_bic` will be null if infinite. Here's a simple example:
       }
     }
   ],
-  "log_bic": -4.77051e-8,
   "hit_rate": 6
 }
 ```

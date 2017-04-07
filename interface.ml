@@ -63,7 +63,7 @@ end;;
 
 module Expr = struct
   type e = Expression.expression = Terminal of string * T.t * unit ref | Application of e * e
-  let run q = Expression.run_expression_for_interval 0.02 q
+  let run q = Expression.run_expression_for_interval 0.1 q
   let of_int n = Terminal(string_of_int n, T.i, Obj.magic (ref n))
   let of_str s = Terminal(s, T.s, Obj.magic (ref s))
   let to_str e = Expression.string_of_expression e
@@ -99,25 +99,17 @@ let ec
     iterations
   =
   let g = ref (Library.make_flat_library initial_primitives)
-  and p = ref (None)
-  and bic = ref (0.0) in
+  and p = ref (None) in
   for it = 1 to iterations do
     let l = if it < iterations then lambda else lambda_final in
     let ng, np, nbic = Em.expectation_maximization_iteration
         l smoothing frontier_size tasks (!g) in
     g := ng;
-    p := Some(np);
-    bic := nbic
+    p := Some(np)
   done;
   let grammar = List.map (snd !g) ~f:(fun (e,(l,_)) -> (Expr.to_str e,l))
   and progs = get_some !p in
-  let hit_rate =
-    List.fold_left ~f:(+) ~init:0 @@ List.map progs
-      ~f:(fun (_, res) -> match res with
-        | Some(_) -> 1
-        | None    -> 0
-      ) in
-  grammar, progs, !bic, hit_rate
+  grammar, progs
 ;;
 
 

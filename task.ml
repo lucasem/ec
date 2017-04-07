@@ -47,6 +47,7 @@ let best_programs dagger task_solutions =
   List.map task_solutions ~f:(fun (t,s) ->
     if List.length s > 0 then
       let (e,p) = List.fold_left (List.tl_exn s) ~init:(List.hd_exn s)
-        ~f:(fun (f,p) (g,q) -> if p > q then (f,p) else (g,q))  in
-      (t.name, Some((p, string_of_expression @@ extract_expression dagger e)))
+        ~f:(fun (f,p) (g,q) -> if p > q then (f,p) else (g,q)) in
+      let e = extract_expression dagger e in
+      (t.name, Some((p, string_of_expression e, e)))
     else (t.name, None))

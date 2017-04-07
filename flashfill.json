@@ -1,149 +1,170 @@
 { "grammar": [],
   "tasks": [
-  { "problems": [
-    { "i":"test", "o":"TEST" },
-    { "i":"tests", "o":"TESTS" },
-    { "i":"test two", "o":"TEST two" },
-    { "i":"yet another test", "o":"YET another test" }
-  ], "name":"upper first"},
-  { "problems": [
-    { "i":"test", "o":"Test" },
-    { "i":"tests", "o":"Tests" },
-    { "i":"test two", "o":"test Two" },
-    { "i":"yet another test", "o":"yet another Test" },
-    { "i":"yet another test", "o":"yet another Test" }
-  ], "name":"cap last"},
-  { "problems": [
-    { "i":"My name is Richard", "o":"Richard" },
-    { "i":"My name is John", "o":"John" },
-    { "i":"My name is Josh", "o":"Josh" },
-    { "i":"My name is Bill", "o":"Bill" },
-    { "i":"My name is Albert", "o":"Albert" }
-  ], "name":"My name is Richard -> Richard"},
-  { "problems": [
-    { "i":"thomas", "o":"Thomas" },
-    { "i":"james", "o":"James" },
-    { "i":"chris", "o":"Chris" },
-    { "i":"charles", "o":"Charles" },
-    { "i":"paul", "o":"Paul" }
-  ], "name":"thomas -> Thomas"},
-  { "problems": [
-    { "i":"Arthur Joe Juan", "o":"A.J.J." },
-    { "i":"Donald Steven George", "o":"D.S.G." },
-    { "i":"Kevin Jason Matthew", "o":"K.J.M." },
-    { "i":"Jose Larry Scott", "o":"J.L.S." },
-    { "i":"Raymond Frank Timothy", "o":"R.F.T." }
-  ], "name":"Arthur Joe Juan -> A.J.J."},
-  { "problems": [
-    { "i":"ruby.clinton@mit.edu", "o":"Ruby Clinton" },
-    { "i":"josh.smith@gmail.com", "o":"Josh Smith" },
-    { "i":"matthew.rosman@yahoo.com", "o":"Matthew Rosman" },
-    { "i":"brent.harold@hotmail.com", "o":"Brent Harold" },
-    { "i":"jim.james@fas.harvard.edu", "o":"Jim James" }
-  ], "name":"ruby.clinton@mit.edu -> Ruby Clinton"},
-  { "problems": [
-    { "i":"CHORE BOY HD SC SPNG 1PK", "o":"1PK" },
-    { "i":"BTR KRNL WK CORN 15Z", "o":"15Z" },
-    { "i":"CAMP DRY DBL NDL 3.6OZ", "o":"3.6OZ" },
-    { "i":"O F TOMATO PASTE 6OZ", "o":"6OZ" },
-    { "i":"FRENCH WORCESTERSHIRE 5Z", "o":"5Z" }
-  ], "name":"CHORE BOY HD SC SPNG 1PK -> 1PK"},
-  { "problems": [
-    { "i":"Principals Of Programming Languages", "o":"POPL" },
-    { "i":"Neural Information Processing Systems", "o":"NIPS" },
-    { "i":"International Conferences on Software Engineering", "o":"ICSE" },
-    { "i":"International Conference on Functional Programming", "o":"ICFP" },
-    { "i":"International Business Machines", "o":"IBM" }
-  ], "name":"Principals Of Programming Languages -> POPL"},
-  { "problems": [
-    { "i":"5/5/1987", "o":"87" },
-    { "i":"1/21/2001", "o":"01" },
-    { "i":"21/1/2001", "o":"01" },
-    { "i":"22.02.2002", "o":"02" },
-    { "i":"2003-23-03", "o":"03" }
-  ], "name":"5/5/1987 -> 87"},
-  { "problems": [
-    { "i":"12012011", "o":"12/01/2011" },
-    { "i":"11152011", "o":"11/15/2011" },
-    { "i":"06222005", "o":"06/22/2005" },
-    { "i":"01252010", "o":"01/25/2010" },
-    { "i":"01112011", "o":"01/11/2011" }
-  ], "name":"12012011 -> 12/01/2011"},
-  { "problems": [
-    { "i":"6/23/15", "o":"6.23.2015" },
-    { "i":"4/12/2023", "o":"4.12.2023" },
-    { "i":"1/23/2009", "o":"1.23.2009" },
-    { "i":"12/32/2013", "o":"12.32.2013" },
-    { "i":"7/15/2015", "o":"7.15.2015" }
-  ], "name":"6/23/15 -> 6.23.2015"},
-  { "problems": [
-    { "i":"IaN RoDny", "o":"Ian Rodny" },
-    { "i":"MELVIN Julian", "o":"Melvin Julian" },
-    { "i":"miKe dwIGHT", "o":"Mike Dwight" },
-    { "i":"StaNleY TRAVis", "o":"Stanley Travis" },
-    { "i":"mary gelman", "o":"Mary Gelman" }
-  ], "name":"IaN RoDny -> Ian Rodny"},
-  { "problems": [
-    { "i":"herbert is <2: Marion> morris", "o":"(2 marion)" },
-    { "i":"country music <9: refrigerator>", "o":"(9 refrigerator)" },
-    { "i":"Three <2: vincent> Jeff", "o":"(2 vincent)" },
-    { "i":"Don Kyle <3: ricky sergio> virgil", "o":"(3 ricky)" },
-    { "i":"francisco eduardo <1: apples>", "o":"(1 apple trees)" }
-  ], "name":"herbert is <2: Marion> morris -> (2 marion)"},
-  { "problems": [
-    { "i":"3 Ames St. Portland OR 02142", "o":"Portland" },
-    { "i":"47 Foskett St. #2 Cambridge MA 02144", "o":"Cambridge" },
-    { "i":"43 Vassar St. 46-4053 Cambridge MA 02139", "o":"Cambridge" },
-    { "i":"3113 Greenfield Ave. Los Angeles CA 90034", "o":"Los Angeles" },
-    { "i":"43 St. Margaret St. #1 Dorchester MA 02145", "o":"Dorchester" }
-  ], "name":"3 Ames St. Portland OR 02142 -> Portland"},
-  { "problems": [
-    { "i":"Marin Lorentzen", "o":"M.L." },
-    { "i":"Annita Nicely", "o":"A.N." },
-    { "i":"Joanie Faas", "o":"J.F." },
-    { "i":"Oma Cornelison", "o":"O.C." },
-    { "i":"Verlene Ottley", "o":"V.O." }
-  ], "name":"Marin Lorentzen -> M.L."},
-  { "problems": [
-    { "i":"#include <os.h>", "o":"OS" },
-    { "i":"#include <malloc.h>", "o":"MALLOC" },
-    { "i":"#include <stdlib.h>", "o":"STDLIB" },
-    { "i":"#include <sys.h>", "o":"SYS" },
-    { "i":"#include <stdio.h>", "o":"STDIO" }
-  ], "name":"#include <os.h> -> OS"},
-  { "problems": [
-    { "i":"August 12 1993", "o":"August" },
-    { "i":"January 8", "o":"January" },
-    { "i":"December 1990", "o":"December" },
-    { "i":"2007 (September)", "o":"September" },
-    { "i":"July 4 2015", "o":"July" }
-  ], "name":"August 12 1993 -> August"},
-  { "problems": [
-    { "i":"47 Foskett St. #2 Cambridge MA 02144", "o":"Foskett" },
-    { "i":"43 Vassar St. 46-4053 Cambridge MA 02139", "o":"Vassar" },
-    { "i":"43 St. Margaret St. #1 Dorchester MA 02145", "o":"St. Margaret" },
-    { "i":"3113 Greenfield Ave. Los Angeles CA 90034", "o":"Greenfield" },
-    { "i":"3 Ames St. Portland OR 02142", "o":"Ames" }
-  ], "name":"47 Foskett St. #2 Cambridge MA 02144 -> Foskett"},
-  { "problems": [
-    { "i":"3113 Greenfield Ave. Los Angeles CA 90034", "o":"3113" },
-    { "i":"47 Foskett St. #2 Cambridge MA 02144", "o":"47" },
-    { "i":"3 Ames St. Portland OR 02142", "o":"3" },
-    { "i":"43 Vassar St. 46-4053 Cambridge MA 02139", "o":"43" },
-    { "i":"43 St. Margaret St. #1 Dorchester MA 02145", "o":"43" }
-  ], "name":"3113 Greenfield Ave. Los Angeles CA 90034 -> 3113"},
-  { "problems": [
-    { "i":"3113 Greenfield Ave. Los Angeles CA 90034", "o":"CA" },
-    { "i":"43 St. Margaret St. #1 Dorchester MA 02145", "o":"MA" },
-    { "i":"3 Ames St. Portland OR 02142", "o":"OR" },
-    { "i":"47 Foskett St. #2 Cambridge MA 02144", "o":"MA" },
-    { "i":"43 Vassar St. 46-4053 Cambridge MA 02139", "o":"MA" }
-  ], "name":"3113 Greenfield Ave. Los Angeles CA 90034 -> CA"},
-  { "problems": [
-    { "i":"IaN", "o":"Ian" },
-    { "i":"MELVIN", "o":"Melvin" },
-    { "i":"miKe", "o":"Mike" },
-    { "i":"StaNleY", "o":"Stanley" },
-    { "i":"mary", "o":"Mary" }
-  ], "name":"IaN -> Ian"}
+    { "name":"upper first",
+      "train": [
+        { "i":"test two", "o":"TEST two" } ],
+      "test": [
+        { "i":"test", "o":"TEST" },
+        { "i":"tests", "o":"TESTS" },
+        { "i":"yet another test", "o":"YET another test" } ] },
+    { "name":"cap last",
+      "train": [
+        { "i":"test two", "o":"test Two" } ],
+      "test": [
+        { "i":"test", "o":"Test" },
+        { "i":"tests", "o":"Tests" },
+        { "i":"yet another test", "o":"yet another Test" },
+        { "i":"yet another test", "o":"yet another Test" } ] },
+  { "name":"My name is Richard -> Richard",
+    "train": [
+      { "i":"My name is Richard", "o":"Richard" } ],
+    "test": [
+      { "i":"My name is John", "o":"John" },
+      { "i":"My name is Josh", "o":"Josh" },
+      { "i":"My name is Bill", "o":"Bill" },
+      { "i":"My name is Albert", "o":"Albert" } ] },
+  { "name":"thomas -> Thomas",
+    "train": [
+      { "i":"thomas", "o":"Thomas" } ],
+    "test": [
+      { "i":"james", "o":"James" },
+      { "i":"chris", "o":"Chris" },
+      { "i":"charles", "o":"Charles" },
+      { "i":"paul", "o":"Paul" } ] },
+  { "name":"Arthur Joe Juan -> A.J.J.",
+    "train": [
+      { "i":"Arthur Joe Juan", "o":"A.J.J." } ],
+    "test": [
+      { "i":"Donald Steven George", "o":"D.S.G." },
+      { "i":"Kevin Jason Matthew", "o":"K.J.M." },
+      { "i":"Jose Larry Scott", "o":"J.L.S." },
+      { "i":"Raymond Frank Timothy", "o":"R.F.T." } ] },
+  { "name":"ruby.clinton@mit.edu -> Ruby Clinton",
+    "train": [
+      { "i":"ruby.clinton@mit.edu", "o":"Ruby Clinton" } ],
+    "test": [
+      { "i":"josh.smith@gmail.com", "o":"Josh Smith" },
+      { "i":"matthew.rosman@yahoo.com", "o":"Matthew Rosman" },
+      { "i":"brent.harold@hotmail.com", "o":"Brent Harold" },
+      { "i":"jim.james@fas.harvard.edu", "o":"Jim James" } ] },
+  { "name":"CHORE BOY HD SC SPNG 1PK -> 1PK",
+    "train": [
+      { "i":"CHORE BOY HD SC SPNG 1PK", "o":"1PK" } ],
+    "test": [
+      { "i":"BTR KRNL WK CORN 15Z", "o":"15Z" },
+      { "i":"CAMP DRY DBL NDL 3.6OZ", "o":"3.6OZ" },
+      { "i":"O F TOMATO PASTE 6OZ", "o":"6OZ" },
+      { "i":"FRENCH WORCESTERSHIRE 5Z", "o":"5Z" } ] },
+  { "name":"Principals Of Programming Languages -> POPL",
+    "train": [
+      { "i":"Principals Of Programming Languages", "o":"POPL" } ],
+    "test": [
+      { "i":"Neural Information Processing Systems", "o":"NIPS" },
+      { "i":"International Conferences on Software Engineering", "o":"ICSE" },
+      { "i":"International Conference on Functional Programming", "o":"ICFP" },
+      { "i":"International Business Machines", "o":"IBM" } ] },
+  { "name":"5/5/1987 -> 87",
+    "train": [
+      { "i":"5/5/1987", "o":"87" } ],
+    "test": [
+      { "i":"1/21/2001", "o":"01" },
+      { "i":"21/1/2001", "o":"01" },
+      { "i":"22.02.2002", "o":"02" },
+      { "i":"2003-23-03", "o":"03" } ] },
+  { "name":"12012011 -> 12/01/2011",
+    "train": [
+      { "i":"12012011", "o":"12/01/2011" } ],
+    "test": [
+      { "i":"11152011", "o":"11/15/2011" },
+      { "i":"06222005", "o":"06/22/2005" },
+      { "i":"01252010", "o":"01/25/2010" },
+      { "i":"01112011", "o":"01/11/2011" } ] },
+  { "name":"6/23/15 -> 6.23.2015",
+    "train": [
+      { "i":"6/23/15", "o":"6.23.2015" } ],
+    "test": [
+      { "i":"4/12/2023", "o":"4.12.2023" },
+      { "i":"1/23/2009", "o":"1.23.2009" },
+      { "i":"12/32/2013", "o":"12.32.2013" },
+      { "i":"7/15/2015", "o":"7.15.2015" } ] },
+  { "name":"IaN RoDny -> Ian Rodny",
+    "train": [
+      { "i":"IaN RoDny", "o":"Ian Rodny" } ],
+    "test": [
+      { "i":"MELVIN Julian", "o":"Melvin Julian" },
+      { "i":"miKe dwIGHT", "o":"Mike Dwight" },
+      { "i":"StaNleY TRAVis", "o":"Stanley Travis" },
+      { "i":"mary gelman", "o":"Mary Gelman" } ] },
+  { "name":"herbert is <2: Marion> morris -> (2 marion)",
+    "train": [
+      { "i":"herbert is <2: Marion> morris", "o":"(2 marion)" } ],
+    "test": [
+      { "i":"country music <9: refrigerator>", "o":"(9 refrigerator)" },
+      { "i":"Three <2: vincent> Jeff", "o":"(2 vincent)" },
+      { "i":"Don Kyle <3: ricky sergio> virgil", "o":"(3 ricky)" },
+      { "i":"francisco eduardo <1: apples>", "o":"(1 apple trees)" } ] },
+  { "name":"3 Ames St. Portland OR 02142 -> Portland",
+    "train": [
+      { "i":"3 Ames St. Portland OR 02142", "o":"Portland" } ],
+    "test": [
+      { "i":"47 Foskett St. #2 Cambridge MA 02144", "o":"Cambridge" },
+      { "i":"43 Vassar St. 46-4053 Cambridge MA 02139", "o":"Cambridge" },
+      { "i":"3113 Greenfield Ave. Los Angeles CA 90034", "o":"Los Angeles" },
+      { "i":"43 St. Margaret St. #1 Dorchester MA 02145", "o":"Dorchester" } ] },
+  { "name":"Marin Lorentzen -> M.L.",
+    "train": [
+      { "i":"Marin Lorentzen", "o":"M.L." } ],
+    "test": [
+      { "i":"Annita Nicely", "o":"A.N." },
+      { "i":"Joanie Faas", "o":"J.F." },
+      { "i":"Oma Cornelison", "o":"O.C." },
+      { "i":"Verlene Ottley", "o":"V.O." } ] },
+  { "name":"#include <os.h> -> OS",
+    "train": [
+      { "i":"#include <os.h>", "o":"OS" } ],
+    "test": [
+      { "i":"#include <malloc.h>", "o":"MALLOC" },
+      { "i":"#include <stdlib.h>", "o":"STDLIB" },
+      { "i":"#include <sys.h>", "o":"SYS" },
+      { "i":"#include <stdio.h>", "o":"STDIO" } ] },
+  { "name":"August 12 1993 -> August",
+    "train": [
+      { "i":"August 12 1993", "o":"August" } ],
+    "test": [
+      { "i":"January 8", "o":"January" },
+      { "i":"December 1990", "o":"December" },
+      { "i":"2007 (September)", "o":"September" },
+      { "i":"July 4 2015", "o":"July" } ] },
+  { "name":"47 Foskett St. #2 Cambridge MA 02144 -> Foskett",
+    "train": [
+      { "i":"47 Foskett St. #2 Cambridge MA 02144", "o":"Foskett" } ],
+    "test": [
+      { "i":"43 Vassar St. 46-4053 Cambridge MA 02139", "o":"Vassar" },
+      { "i":"43 St. Margaret St. #1 Dorchester MA 02145", "o":"St. Margaret" },
+      { "i":"3113 Greenfield Ave. Los Angeles CA 90034", "o":"Greenfield" },
+      { "i":"3 Ames St. Portland OR 02142", "o":"Ames" } ] },
+  { "name":"3113 Greenfield Ave. Los Angeles CA 90034 -> 3113",
+    "train": [
+      { "i":"3113 Greenfield Ave. Los Angeles CA 90034", "o":"3113" } ],
+    "test": [
+      { "i":"47 Foskett St. #2 Cambridge MA 02144", "o":"47" },
+      { "i":"3 Ames St. Portland OR 02142", "o":"3" },
+      { "i":"43 Vassar St. 46-4053 Cambridge MA 02139", "o":"43" },
+      { "i":"43 St. Margaret St. #1 Dorchester MA 02145", "o":"43" } ] },
+  { "name":"3113 Greenfield Ave. Los Angeles CA 90034 -> CA",
+    "train": [
+      { "i":"3113 Greenfield Ave. Los Angeles CA 90034", "o":"CA" } ],
+    "test": [
+      { "i":"43 St. Margaret St. #1 Dorchester MA 02145", "o":"MA" },
+      { "i":"3 Ames St. Portland OR 02142", "o":"OR" },
+      { "i":"47 Foskett St. #2 Cambridge MA 02144", "o":"MA" },
+      { "i":"43 Vassar St. 46-4053 Cambridge MA 02139", "o":"MA" } ] },
+  { "name":"IaN -> Ian",
+    "train": [
+      { "i":"IaN", "o":"Ian" } ],
+    "test": [
+      { "i":"MELVIN", "o":"Melvin" },
+      { "i":"miKe", "o":"Mike" },
+      { "i":"StaNleY", "o":"Stanley" },
+      { "i":"mary", "o":"Mary" } ] }
 ]}
