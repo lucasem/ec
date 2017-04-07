@@ -47,11 +47,12 @@ let enumerate_bounded ?prune:(prune = do_not_prune) (* testing of expressions as
         with _ -> () (* type error *))
   in
   let hits = Int.Table.create () in
+  let start_time = time () in
   enumerate true rt bound (fun i _ _ _ ->
       if not (prune i) then
-        Hashtbl.set hits ~key:(insert_expression dagger i) ~data:true
+        Hashtbl.set hits ~key:(insert_expression dagger i) ~data:((time ())-.start_time)
       else incr number_pruned);
-  (Hashtbl.keys hits, !number_pruned)
+  (Hashtbl.to_alist hits, !number_pruned)
 
 
 (* iterative deepening version of enumerate_bounded *)
@@ -67,43 +68,23 @@ let enumerate_ID ?prune:(prune = do_not_prune) dagger library t frontier_size =
 let always_sampled_prior = false (* forces us to enumerate from the prior *)
 
 let enumerate_frontiers_for_tasks grammar frontier_size tasks
-  : (tp*int list) list*expressionGraph =
+  : (tp*(int*float) list) list*expressionGraph = (* this only enumerates normal tasks *)
   let start_time = time () in
-  let (special_tasks,normal_tasks) = List.partition_tf tasks ~f:(fun t -> is_some @@ t.proposal) in
+  let normal_tasks = List.filter tasks ~f:(fun t -> is_none @@ t.proposal) in
   let types = remove_duplicates (List.map tasks ~f:(fun t -> t.task_type)) in
   let dagger = make_expression_graph 100000 in
   let indices = List.map types ~f:(fun t ->
       if always_sampled_prior || not (List.is_empty normal_tasks)
       then enumerate_ID dagger grammar t frontier_size
       else []) in
-  let special_indices =
-    let parallel_results = parallel_map special_tasks ~f:(fun t ->
-        let dagger = make_expression_graph 10000 in
-        let special_grammar = modify_grammar grammar t in
-        let l = task_likelihood t in
-        let prune j = not @@ is_valid @@ l j in
-        let special_indices = enumerate_ID ~prune dagger special_grammar t.task_type frontier_size in
-        scrub_graph dagger;
-        (dagger, t.task_type, List.fold_left special_indices
-           ~f:Int.Set.add ~init:Int.Set.empty)) in
-    List.map parallel_results ~f:(fun (d,t,i) ->
-      dirty_graph d;
-      (t,Int.Set.map i ~f:(insert_expression dagger % extract_expression d))) in
   let end_time = time () in
-  let start_time = time() in
-  let indices = List.zip_exn types @@
-    List.map indices ~f:(fun iDs ->
-        List.fold_left iDs ~init:Int.Set.empty ~f:Int.Set.add) in
-  (* combines special indices with normal indices *)
-  let indices = List.fold_left special_indices ~f:(fun i (ty,j) ->
-      i |> List.map ~f:(fun (ty2,j2) -> if ty = ty2
-                         then (ty2,Int.Set.union j j2)
-                         else (ty2,j2))) ~init:indices in
-  let number_of_programs = indices |> List.map ~f:snd |>
-                           List.fold_left ~f:Int.Set.union ~init:Int.Set.empty |>
-                           Int.Set.length in
-  let end_time = time() in
-  (indices |> List.map ~f:(fun (t,s) -> (t,Int.Set.to_list s)), dagger)
+  let time_enumerate = end_time-.start_time in
+  let indices = List.zip_exn types @@ List.map indices ~f:(fun ids_with_times ->
+        let tab = Int.Table.create () in
+        List.iter ids_with_times ~f:(fun (id,dt) -> Int.Table.set tab ~key:id ~data:dt);
+        tab) in
+  (* disregard special tasks *)
+  (indices |> List.map ~f:(fun (t,tab) -> (t,Int.Table.to_alist tab)), dagger)
 
 (* computes likelihood of MAP parse *)
 let rec map_likelihood g request e =

@@ -13,12 +13,13 @@ open Expression
 let frontier_requests frontiers =
   List.fold_left frontiers
     ~init:Int.Map.empty ~f:(fun requests (requested_type,frontier) ->
-        List.fold_left frontier ~init:requests ~f:(fun (a : (tp list) Int.Map.t) (i : int) ->
-            match Int.Map.find a i with
-            | Some(old) ->
-              if List.mem old requested_type then a
-              else Int.Map.add a ~key:i ~data:(requested_type::old)
-            | None -> Int.Map.add a ~key:i ~data:[requested_type]))
+        List.fold_left frontier ~init:requests
+          ~f:(fun (a : (tp list) Int.Map.t) (i,dt) ->
+              match Int.Map.find a i with
+              | Some(old) ->
+                if List.mem old requested_type then a
+                else Int.Map.add a ~key:i ~data:(requested_type::old)
+              | None -> Int.Map.add a ~key:i ~data:[requested_type]))
 
 (* wrapper over various enumeration and scoring functions *)
 (* returns a list of frontiers, one for each task *)
@@ -38,7 +39,7 @@ let make_frontiers size keep_size grammar tasks =
       (* display the hit rate *)
       begin
         let number_hit = List.length (List.filter top_program_scores ~f:(fun scores ->
-            List.exists scores ~f:(fun (_,s) -> s > log (0.999)))) in
+            List.exists scores ~f:(fun (_,s,_) -> s > log (0.999)))) in
         let number_of_partial = List.length (List.filter ~f:(fun scores ->
             List.length scores > 0
           ) top_program_scores) in
@@ -46,7 +47,7 @@ let make_frontiers size keep_size grammar tasks =
         let requests = frontier_requests top_frontiers in
         let likelihoods = program_likelihoods grammar dagger (infer_graph_types dagger) requests in
         let top_program_scores = List.map2_exn tasks top_program_scores ~f:(fun t ss ->
-            List.map ss ~f:(fun (i,s) ->
+            List.map ss ~f:(fun (i,s,_) ->
                 (i,s,Hashtbl.find_exn likelihoods (i,t.task_type)))) in
         (dagger, top_program_scores)
       end
@@ -89,7 +90,7 @@ let make_frontiers size keep_size grammar tasks =
 let bic_posterior_surrogate ?print:(print = false) lambda dagger grammar task_solutions =
   let likelihood = List.fold_left task_solutions ~init:0. ~f:(fun l (t,f) ->
       if List.length f > 0
-      then l +. lse_list (List.map f ~f:(fun (i,s) ->
+      then l +. lse_list (List.map f ~f:(fun (i,s,_) ->
           s+.get_some (likelihood_option grammar t.task_type (extract_expression dagger i))))
       else l) in
   let m = Float.of_int (List.length @@ snd grammar) in

@@ -26,7 +26,7 @@ let verify progs (test : Task.t List.t) =
     let (name, res) = prog in
     match res with
     | None -> prog
-    | Some((_, _, e)) ->
+    | Some((_, _, e, _)) ->
         let task = List.find test ~f:(fun t->t.name=name) in
         match task with
         | None -> prog
@@ -47,9 +47,10 @@ let json_of_ec_results grammar progs hit_rate =
     `Assoc [ ("task", `String name); ("result",
       match res with
         | None -> `Null
-        | Some((p, es, _)) -> `Assoc [
+        | Some((p, es, _, dt)) -> `Assoc [
           ("log_probability", `Float p);
-          ("expr", `String es) ]
+          ("expr", `String es);
+          ("time", `Float dt) ]
     )])) in
   `Assoc [
     ("grammar", json_grammar);
@@ -64,7 +65,7 @@ let main () =
   end;
   let train, test, combs = load_json Sys.argv.(1) in
   let grammar, progs =
-    ec combs train 5 ~lambda:0.5 ~lambda_final:1.5 ~frontier_size:3000 in
+    ec combs train 5 ~lambda:0.5 ~smoothing:0.3 ~frontier_size:3000 in
   let progs = verify progs test in
   let hit_rate =
     List.fold_left ~f:(+) ~init:0 @@ List.map progs

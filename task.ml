@@ -30,24 +30,21 @@ let modify_grammar grammar t =
   (fst grammar,special_weights)
 
 let score_programs dagger frontiers tasks =
-  let start_time = time() in
-  let scores = parallel_map tasks ~f:(fun task ->
+  parallel_map tasks ~f:(fun task ->
       let ll = match task.score with
       | Seed(_) -> raise (Failure "score_programs: task has seed")
       | LogLikelihood(ll) -> ll in
       List.filter_map (List.Assoc.find_exn frontiers task.task_type)
-        ~f:(fun i ->
+        ~f:(fun (i,dt) ->
             let e = extract_expression dagger i in
             let l = ll e in
-            if is_valid l then Some((i,l)) else None)) in
-  let end_time = time() in
-  scores
+            if is_valid l then Some((i,l,dt)) else None))
 
 let best_programs dagger task_solutions =
   List.map task_solutions ~f:(fun (t,s) ->
     if List.length s > 0 then
-      let (e,p) = List.fold_left (List.tl_exn s) ~init:(List.hd_exn s)
-        ~f:(fun (f,p) (g,q) -> if p > q then (f,p) else (g,q)) in
+      let (e,p,dt) = List.fold_left (List.tl_exn s) ~init:(List.hd_exn s)
+        ~f:(fun (f,p,dta) (g,q,dtb) -> if p > q then (f,p,dta) else (g,q,dtb)) in
       let e = extract_expression dagger e in
-      (t.name, Some((p, string_of_expression e, e)))
+      (t.name, Some((p, string_of_expression e, e, dt)))
     else (t.name, None))
