@@ -58,7 +58,7 @@ simple example:
 ```json
 {
   "grammar": [
-    { "expr": "(C nth)", "log_likelihood": -0.18777993926628667 },
+    { "expr": "((B cap) lower)", "log_likelihood": -0.18777993926628667 },
     { "expr": "+1", "log_likelihood": -0.014358297145754317 },
     { "expr": "-1", "log_likelihood": -1.3729226430171515 },
     { "expr": "0", "log_likelihood": -0.004397513849555779 },
@@ -88,7 +88,7 @@ simple example:
       }
     }
   ],
-  "hit_rate": 6
+  "hit_rate": 3
 }
 ```
 

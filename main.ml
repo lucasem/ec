@@ -65,7 +65,7 @@ let main () =
   end;
   let train, test, combs = load_json Sys.argv.(1) in
   let grammar, progs =
-    ec combs train 5 ~lambda:0.5 ~smoothing:0.3 ~frontier_size:3000 in
+    ec combs train 5 ~lambda:0.5 ~smoothing:0.6 ~frontier_size:2000 in
   let progs = verify progs test in
   let hit_rate =
     List.fold_left ~f:(+) ~init:0 @@ List.map progs
