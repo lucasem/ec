@@ -51,10 +51,12 @@ according to the given task set. Each item in the `programs` list is an
 object with two fields, `task` (string) and `result` (null/obj),
 corresponding to the task name and its results. `result` is null if the task
 failed in either the train or both train and test problem sets, or (on
-success) an object with `probability` (float) and `expr` (string) fields,
-where `expr` is the string representation of the combinator that solved the
-task and `log_probability` is its associated log-probability. Here's a
-simple example:
+success) an object with `log_probability` (float), `expr` (string), and `time`
+(float) fields, where `expr` is the string representation of the combinator
+that solved the task and `log_probability` is its associated
+log-probability, and `time` is how long, in seconds, it took to enumerate
+the solution in the last iteration of the EC algorithm.
+Here's a simple example:
 ```json
 {
   "grammar": [
@@ -77,14 +79,16 @@ simple example:
       "task": "IaN -> Ian",
       "result": {
         "log_probability": -6.86148489441,
-        "expr": "((B cap) lower)"
+        "expr": "((B cap) lower)",
+        "time": 0.056375980377197266
       }
     },
     {
       "task": "IaN RoDny -> Ian Rodny",
       "result": {
         "log_probability": -11.165047406,
-        "expr": "((C feach) ((B cap) lower))"
+        "expr": "((C feach) ((B cap) lower))",
+        "time": 0.056375980377197266
       }
     }
   ],
