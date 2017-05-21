@@ -58,14 +58,10 @@ let json_of_ec_results grammar progs hit_rate =
     ("hit_rate", `Int hit_rate);
   ]
 
-let main () =
-  if Array.length Sys.argv < 2 then begin
-    Printf.eprintf "Failure: must supply tasks file as argument\n";
-    exit 1
-  end;
-  let train, test, combs = load_json Sys.argv.(1) in
+let main it lambda smoothing frontier_size file () =
+  let train, test, combs = load_json file in
   let grammar, progs =
-    ec combs train 5 ~lambda:0.5 ~smoothing:0.6 ~frontier_size:2000 in
+    ec combs train it ~lambda ~smoothing ~frontier_size in
   let progs = verify progs test in
   let hit_rate =
     List.fold_left ~f:(+) ~init:0 @@ List.map progs
@@ -75,7 +71,18 @@ let main () =
       ) in
   Yojson.Basic.pretty_to_channel stdout
     @@ json_of_ec_results grammar progs hit_rate
-;;
 
-main ();;
+let command =
+  Core.Std.Command.basic
+    ~summary:"run EC on the given tasks (see file format at github.com/lucasem/ec)"
+    Core.Std.Command.Spec.(
+      empty
+      +> flag "-it" (optional_with_default 5 int) ~doc:"integer Number of iterations (default: 5)"
+      +> flag "-lambda" (optional_with_default 1.5 float) ~doc:"float Grammar learning cutoff (lower ~ more eager learning) (default: 1.5)"
+      +> flag "-smoothing" (optional_with_default 1.0 float) ~doc:"float Grammar parameter estimation factor (lower ~ more eager learning) (default: 1.0)"
+      +> flag "-frontier-size" (optional_with_default 5000 int) ~doc:"integer Frontier size (default: 5000)"
+      +> anon ("filename" %: string)
+    )
+    main
 
+let () = Core.Std.Command.run ~version:"1.0" command

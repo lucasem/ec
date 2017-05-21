@@ -18,6 +18,18 @@ task set in `./flashfill.json` using `make run`.
 The **`ec`** binary takes one argument: the filename of a json file. The
 results are formatted in json and sent to stdout.
 
+### Settings
+
+The following optional flags are provided:
+```
+[-frontier-size integer]  Frontier size (default: 5000)
+[-it integer]             Number of iterations (default: 5)
+[-lambda float]           Grammar learning cutoff (lower ~ more eager
+                          learning) (default: 1.5)
+[-smoothing float]        Grammar parameter estimation factor (lower ~ more
+                          eager learning) (default: 1.0)
+```
+
 ### Input
 The input json must possess `grammar` and `tasks` fields which are lists.
 Each item in the `grammar` list is an object with a single field, `expr`,
