@@ -30,6 +30,11 @@ The following optional flags are provided:
                           eager learning) (default: 1.0)
 ```
 
+These flags may be used as follows:
+```sh
+./ec -it 7 -frontier-size 10000 -lambda 0.6 -smoothing 1.0 flashfill.json
+```
+
 ### Input
 The input json must possess `grammar` and `tasks` fields which are lists.
 Each item in the `grammar` list is an object with a single field, `expr`,
