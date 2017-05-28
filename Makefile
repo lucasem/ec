@@ -12,6 +12,10 @@ ec: $(src)
 	cp `readlink $(entry)` ec
 	$(RM) $(entry)
 
+results: ec
+	./mk_data.sh
+	@echo "results produced in data.tsv and results.eps"
+
 mini: $(src)
 	$(C) -pkg yojson -quiet $(mini)
 	@echo "running mini:"

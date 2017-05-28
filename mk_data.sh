@@ -1,12 +1,12 @@
 #!/bin/bash
-# produces data (out.tsv) and learning curve plots (dem.eps)
+# produces data (data.tsv) and learning curve plots (results.eps)
 # REQUIRES jq (https://stedolan.github.io/jq)
 
 cd $(dirname ${BASH_SOURCE[0]})
 
 EC=./ec
 INPUT=flashfill.json
-OUTPUT=out.tsv
+OUTPUT=data.tsv
 
 if [ ! -f $EC ]
 then >&2 echo "please build `pwd`/ec before use"
@@ -25,4 +25,4 @@ done
 done
 done
 
-python plot.py out.tsv
+python plot.py data.tsv

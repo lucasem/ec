@@ -1,6 +1,6 @@
 
 # usage: python plot.py out.tsv
-# produces dem.eps, showing learning curve (% tasks solved vs iteration) for various frontier sizes.
+# produces results.eps, showing learning curve (% tasks solved vs iteration) for various frontier sizes.
 
 import sys
 import os
@@ -10,6 +10,8 @@ from functools import reduce
 from itertools import combinations
 
 from matplotlib import pyplot as plt
+
+OUTPUT = 'results.eps'
 
 if len(sys.argv) < 2:
     print("must TSV file")
@@ -42,9 +44,11 @@ plt.savefig('res.eps')
 plt.legend()
 plt.ylabel('% tasks solved')
 plt.xlabel('iteration')
-plt.savefig('dem.eps')
-exit()
+plt.savefig(OUTPUT)
 
+
+exit()
+# Use this if you want to visualize the entire dataset
 plt.figure(figsize=(12,12))
 n = 1
 for k in table:
@@ -57,4 +61,4 @@ for k in table:
     plt.xlabel('iteration')
     n += 1
 plt.tight_layout()
-plt.savefig('res.eps')
+plt.savefig(OUTPUT)
