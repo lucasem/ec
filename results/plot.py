@@ -1,4 +1,3 @@
-
 # usage: python plot.py out.tsv
 # produces results.eps, showing learning curve (% tasks solved vs iteration) for various frontier sizes.
 
@@ -60,9 +59,9 @@ for frontier_size in table[(1.0, 1.0)]:
     vals = non_overlapping(table, (1.0, 1.0), frontier_size, exclude={0,1})
     plt.plot(list(range(1,1+len(vals))), vals, label=f"{frontier_size}")
 plt.savefig('res.eps')
-plt.legend()
-plt.ylabel('% tasks solved')
-plt.xlabel('iteration')
+plt.legend(fontsize=14)
+plt.ylabel('% tasks solved', size=16)
+plt.xlabel('iteration', size=16)
 plt.savefig(OUTPUT)
 
 
