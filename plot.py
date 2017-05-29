@@ -29,6 +29,24 @@ def make_table(filename): # {(smoothing, lambda): {frontier_size: [hit_rate]}}}
             tab[(s,l)][frontier_size].append(hit_rate)
     return tab
 
+# prevent lines from overlapping each other in the plot
+# by marginally increasing the value of one of them.
+# returns something that might exactly be table[key][frontier_size]
+def non_overlapping(table, k, frontier_size, error=0.005, exclude=None):
+    vals = table[(1.0, 1.0)][frontier_size].copy()
+    for i, val in enumerate(vals):
+        if exclude and i in exclude: continue
+        # largest value no greater than the current one, only considering smaller frontiers
+        other = max(
+                filter(lambda v: v <= val,
+                    map(lambda f: table[k][f][i],
+                        filter(lambda f: f<frontier_size,
+                            table[k].keys()))),
+                default=-1)
+        if abs(other-val) < error:
+            vals[i] = val + error
+    return vals
+
 table = make_table(sys.argv[1])
 
 smoothings = set(map(lambda k:k[0], table.keys()))
@@ -39,6 +57,7 @@ x, y = len(smoothings), len(lambdas)
 # I decided on the best parameters for demonstration.
 for frontier_size in table[(1.0, 1.0)]:
     vals = table[(1.0, 1.0)][frontier_size]
+    vals = non_overlapping(table, (1.0, 1.0), frontier_size, exclude={0,1})
     plt.plot(list(range(1,1+len(vals))), vals, label=f"{frontier_size}")
 plt.savefig('res.eps')
 plt.legend()
