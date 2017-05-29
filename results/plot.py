@@ -10,7 +10,7 @@ from itertools import combinations
 
 from matplotlib import pyplot as plt
 
-OUTPUT = 'results.eps'
+OUTPUT = 'learning_curves.eps'
 
 if len(sys.argv) < 2:
     print("must TSV file")
@@ -54,18 +54,17 @@ x, y = len(smoothings), len(lambdas)
 
 # After running the code further below (after this block),
 # I decided on the best parameters for demonstration.
-for frontier_size in table[(1.0, 1.0)]:
-    vals = table[(1.0, 1.0)][frontier_size]
-    vals = non_overlapping(table, (1.0, 1.0), frontier_size, exclude={0,1})
-    plt.plot(list(range(1,1+len(vals))), vals, label=f"{frontier_size}")
-plt.savefig('res.eps')
-plt.legend(fontsize=14)
-plt.ylabel('% tasks solved', size=16)
-plt.xlabel('iteration', size=16)
-plt.savefig(OUTPUT)
+#for frontier_size in table[(1.0, 1.0)]:
+#    vals = table[(1.0, 1.0)][frontier_size]
+#    vals = non_overlapping(table, (1.0, 1.0), frontier_size, exclude={0,1})
+#    plt.plot(list(range(1,1+len(vals))), vals, label=f"{frontier_size}")
+#plt.savefig('res.eps')
+#plt.legend(fontsize=14)
+#plt.ylabel('% tasks solved', size=16)
+#plt.xlabel('iteration', size=16)
+#plt.savefig(OUTPUT)
 
 
-exit()
 # Use this if you want to visualize the entire dataset
 plt.figure(figsize=(12,12))
 n = 1

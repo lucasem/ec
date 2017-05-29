@@ -13,8 +13,8 @@ ec: $(src)
 	$(RM) $(entry)
 
 results: ec
-	./mk_data.sh
-	@echo "results produced in data.tsv and results.eps"
+	./results/mk_data.sh
+	@echo "results produced in results/data.tsv and results/learning_curves.eps"
 
 mini: $(src)
 	$(C) -pkg yojson -quiet $(mini)
