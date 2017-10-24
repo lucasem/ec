@@ -13,4 +13,4 @@ let main () =
   | _ -> "FAIL")
 ;;
 
-main ();;
+main ()

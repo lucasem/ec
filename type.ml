@@ -1,8 +1,6 @@
 open Core.Std
 
-
 module TypeMap = Map.Make(Int)
-
 
 
 type tp =
@@ -10,9 +8,9 @@ type tp =
   | TCon of string * tp list
 
 type tContext = int * tp TypeMap.t
-let empty_context = (0,TypeMap.empty);;
-let make_arrow t q = TCon("->", [t;q]);;
-let (@>) = make_arrow;;
+let empty_context = (0,TypeMap.empty)
+let make_arrow t q = TCon("->", [t;q])
+let (@>) = make_arrow
 
 let rec string_of_type (t : tp) : string =
   match t with
@@ -21,12 +19,9 @@ let rec string_of_type (t : tp) : string =
   | TCon(k,[p;q]) when k = "->" -> "("^(string_of_type p)^" -> "^(string_of_type q)^")"
   | TCon(k,a) -> "("^k^" "^(String.concat ~sep:" " (List.map a ~f:string_of_type))^")"
 
+let makeTID context = (TID(fst context), (fst context+1, snd context))
 
-let makeTID context =
-  (TID(fst context), (fst context+1, snd context))
-
-let bindTID i t context =
-  (fst context, TypeMap.add (snd context) ~key:i ~data:t)
+let bindTID i t context = (fst context, TypeMap.add (snd context) ~key:i ~data:t)
 
 let rec chaseType (context : tContext) (t : tp) : tp*tContext =
   match t with
@@ -51,8 +46,6 @@ let rec occurs (i : int) (t : tp) : bool =
   | TCon(_,ts) ->
     List.exists ts ~f:(occurs i)
 
-let occursCheck = true
-
 let rec unify context t1 t2 : tContext =
   let (t1_, context_) = chaseType context t1 in
   let (t2_, context__) = chaseType context_ t2 in
@@ -61,17 +54,16 @@ and unify_ context t1 t2 : tContext =
   match (t1, t2) with
   | (TID(i), TID(j)) when i = j -> context
   | (TID(i), _) ->
-    if occursCheck && occurs i t2
+    if occurs i t2
     then raise (Failure "occurs")
     else bindTID i t2 context
   | (_,TID(i)) ->
-    if occursCheck && occurs i t1
+    if occurs i t1
     then raise (Failure "occurs")
     else bindTID i t1 context
   | (TCon(k1,as1),TCon(k2,as2)) when k1 = k2 ->
     List.fold2_exn ~init:context as1 as2 ~f:unify
   | _ -> raise (Failure "unify")
-
 
 type fast_type =
   | FCon of string * fast_type list
@@ -137,13 +129,6 @@ let instantiate_type (n,m) t =
   in let q = instantiate t in
   (q,(!next,m))
 
-
-let slow_can_unify c template target = try
-    let (template, c) = instantiate_type c template in
-    ignore(unify c template target); true
-  with _ -> false
-
-
 (* puts a type into normal form *)
 let canonical_type t =
   let next = ref 0 in
@@ -195,13 +180,11 @@ let rec get_arity = function
   | TCon(a,[_;r]) when a = "->" -> 1+get_arity r
   | _ -> 0
 
-
-let make_ground g = TCon(g,[]);;
-let tint = make_ground "int";;
-let treal = make_ground "real";;
-let t0 = TID(0);;
-let t1 = TID(1);;
-let t2 = TID(2);;
-let t3 = TID(3);;
-let t4 = TID(4);;
-
+let make_ground g = TCon(g,[])
+let tint = make_ground "int"
+let treal = make_ground "real"
+let t0 = TID(0)
+let t1 = TID(1)
+let t2 = TID(2)
+let t3 = TID(3)
+let t4 = TID(4)

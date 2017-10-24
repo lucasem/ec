@@ -1,14 +1,11 @@
 open Core.Std
 
 open Expression
-open Type
 open Task
 open Library
 open Enumerate
 open Utils
-open Compress
 open Frontier
-open Bottom_up
 
 
 let rec expectation_maximization_compress
@@ -28,9 +25,8 @@ let rec expectation_maximization_compress
     | ExpressionBranch(l,r) ->
       reward_expression weight l;
       reward_expression weight r;
-      (try
-         let old = Hashtbl.find_exn candidate_rewards i in
-         Hashtbl.set candidate_rewards ~key:i ~data:(lse old weight)
+      (try let old = Hashtbl.find_exn candidate_rewards i in
+       Hashtbl.set candidate_rewards ~key:i ~data:(lse old weight)
        with Not_found -> ())
     | _ -> ()
   in
@@ -50,8 +46,7 @@ let rec expectation_maximization_compress
       tasks task_posteriors in
   (* fit the continuous parameters of the new grammar *)
   let likelihoods = program_likelihoods new_grammar dagger type_array requests in
-  let final_grammar =
-    fit_grammar smoothing ~application_smoothing new_grammar dagger type_array likelihoods corpus in
+  let final_grammar = fit_grammar smoothing ~application_smoothing new_grammar dagger type_array likelihoods corpus in
   let program_scores = List.map2_exn tasks program_scores ~f:(fun t ->
       List.map ~f:(fun (i,ll,_) -> (i,ll,Hashtbl.find_exn likelihoods (i,t.task_type)))) in
   (* check to see if we've hit a fixed point *)
@@ -59,8 +54,7 @@ let rec expectation_maximization_compress
   then (final_grammar,
         let ll = List.fold_left ~init:0.0 program_scores ~f:(fun a ss ->
           if List.length ss > 0
-          then List.fold_left ~init:Float.neg_infinity ss ~f:(fun a (_,ll,lp) ->
-            lse a (ll+.lp))
+          then List.fold_left ~init:Float.neg_infinity ss ~f:(fun a (_,ll,lp) -> lse a (ll+.lp))
           else a) in
         let m = Float.of_int (List.length productions) in
         let n = List.fold_left ~init:0.0 program_scores ~f:(fun n f ->
@@ -68,7 +62,6 @@ let rec expectation_maximization_compress
         m *. (-. lambda -. 0.5 *. log n) +. ll)
   else expectation_maximization_compress lambda smoothing application_smoothing
       final_grammar dagger type_array requests candidates tasks program_scores
-
 
 let expectation_maximization_iteration ?compression_tries:(compression_tries = 1)
     lambda smoothing ?application_smoothing:(application_smoothing = smoothing)
@@ -79,7 +72,8 @@ let expectation_maximization_iteration ?compression_tries:(compression_tries = 1
   (* compute likelihoods under grammar and then normalize the frontiers *)
   let type_array = infer_graph_types dagger in
   let requests = frontier_requests frontiers in
-  let candidates = candidate_ground_fragments dagger @@ List.map program_scores ~f:(List.map ~f:(fun (i,s,dt)->i)) in
+  let reachable = reachable_expressions dagger @@ List.concat @@ List.map program_scores ~f:(List.map ~f:(fun (i,_s,_dt)->i)) in
+  let candidates = Int.Set.elements reachable |> List.filter ~f:(not % is_leaf_ID dagger) in
   let g0 = make_flat_library @@ List.filter ~f:is_terminal @@ List.map ~f:fst @@ snd grammar in
   (* makes the nth (random) frontiers *)
   let random_frontier n s =

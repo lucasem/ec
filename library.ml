@@ -1,15 +1,9 @@
 open Core.Std
 
-open Task
 open Expression
 open Type
 open Utils
 
-open Obj
-
-
-(* specializes the list typed to only work on phonemes *)
-let phonetic_list = true
 
 type library = float * (expression*(float*tp)) list
 
@@ -28,13 +22,11 @@ let program_likelihoods (log_application,library) dagger program_types requests 
   (* is ? in the library *)
   let is_library_wild = List.exists terminals ~f:(is_wildcard dagger % fst) in
   (* get all of the different types we can choose from *)
-  let terminal_types =
-    List.map library ~f:(fun (_,(l,t)) -> (t,l)) in
+  let terminal_types = List.map library ~f:(fun (_,(l,t)) -> (t,l)) in
   let likelihoods = Hashtbl.Poly.create () in
   let rec likelihood (i : int) (request : tp) =
     if not is_library_wild && is_wildcard dagger i then 0. else
-    try
-      Hashtbl.find_exn likelihoods (i,request)
+    try Hashtbl.find_exn likelihoods (i,request)
     with _ ->
       let log_probability =
         let terminal_probability =
@@ -61,7 +53,7 @@ let program_likelihoods (log_application,library) dagger program_types requests 
 
 (* computes likelihood of a possibly ill typed program: returns None if it doesn't type *)
 let likelihood_option library request e =
-  let dagger = make_expression_graph 100 in
+  let dagger = make_expression_graph () in
   let i = insert_expression dagger e in
   let requests = Int.Map.singleton i [request] in
   try
@@ -93,9 +85,8 @@ let fit_grammar smoothing ?application_smoothing (log_application,library) dagge
      this ordering determines where they go in the use arrays
      "offsets" index into this list
    *)
-  let terminal_order =
-    List.mapi library ~f:(fun i (e,(l,t)) -> (insert_expression dagger e,
-                                              (t, l, i))) in
+  let terminal_order = List.mapi library ~f:(fun i (e,(l,t)) ->
+    (insert_expression dagger e, (t, l, i))) in
   let number_terminals = List.length terminal_order in
   let counts = { application_counts = log application_smoothing;
                  terminal_counts = log application_smoothing;
@@ -157,199 +148,61 @@ let fit_grammar smoothing ?application_smoothing (log_application,library) dagge
       in (e, (p,infer_type e)))
   in (log_application,distribution)
 
-(* wrapper over fit_grammar that does not assume a corpus structure *)
-let fit_grammar_to_tasks smoothing grammar dagger program_types requests task_solutions =
-  let likelihoods = program_likelihoods grammar dagger program_types requests in
-  let task_posteriors = List.map task_solutions ~f:(fun (t,s) ->
-    List.map s ~f:(fun (i,l) ->
-          ((i,t.task_type),l+.Hashtbl.find_exn likelihoods (i,t.task_type)))) in
-  let zs = List.map task_posteriors ~f:(fun p ->
-    lse_list @@ List.map p ~f:snd) in
-  let task_posteriors = List.map2_exn task_posteriors zs ~f:(fun p z ->
-    List.map p ~f:(fun (i,l) -> (i,l-.z))) in
-  let corpus = merge_a_list task_posteriors ~f:lse in
-  fit_grammar smoothing grammar dagger program_types likelihoods corpus
-
-(* various built-in primitives *)
-let c_S = Terminal("S", canonical_type @@
-                  make_arrow (make_arrow t1 (make_arrow t2 t3))
-                             (make_arrow (make_arrow t1 t2)
-                                         (make_arrow t1 t3)),
-                  Obj.magic (ref (fun f ->
-                       Some(fun g ->
-                         Some(fun x ->
-                             match f with
-                             | None -> None
-                             | Some(f) ->
-                               match f x with
-                               | None -> None
-                               | Some(left) ->
-                                 left @@ match g with
-                                 | None -> None
-                                 | Some(g) -> g x)))));;
-let c_B = Terminal("B", canonical_type @@
-                  make_arrow (make_arrow t2 t3)
-                             (make_arrow (make_arrow t1 t2)
-                                         (make_arrow t1 t3)),
-                  Obj.magic (ref (fun f  ->
-                       Some(fun g ->
-                           Some(fun x ->
-                             match f with
-                             | None -> None
-                             | Some(f) ->
-                               f @@ match g with
-                               | None -> None
-                               | Some(g) -> g x)))));;
-let c_C = Terminal("C",  canonical_type @@
-                  make_arrow (make_arrow t1 (make_arrow t2 t3))
-                             (make_arrow t2 (make_arrow t1 t3)),
-                  Obj.magic (ref (fun f ->
-                       Some(fun g ->
-                         Some(fun x ->
-                             match f with
-                             | None -> None
-                             | Some(f) ->
-                               match f x with
-                               | None -> None
-                               | Some(left) ->
-                                 left g)))));;
-let c_K = Terminal("K", canonical_type @@
-                   make_arrow t1 (make_arrow t2 t1),
-                   Obj.magic (ref (fun x -> Some(fun _ -> x))));;
-let c_F = Terminal("F", canonical_type @@
-                   make_arrow t1 (make_arrow t2 t2),
-                   Obj.magic (ref (fun _ -> Some(fun x -> x))));;
-let c_I = Terminal("I", canonical_type @@
-                   make_arrow t1 t1,
-                   Obj.magic (ref (fun x -> x)));;
-let combinatory_library =
-  make_flat_library [c_S;c_B;c_C;c_K;c_F;c_I]
-
+(* built-in primitives *)
 let c_bottom = Terminal("bottom",canonical_type t1,Obj.magic @@ ref None)
-
-let c_one = Terminal("1",tint,Obj.magic (ref 1));;
-let c_zero = Terminal("0",tint,Obj.magic (ref 0));;
-let c_numbers = List.map (0--9) ~f:expression_of_int;;
-let c_plus = Terminal("+",
-                     make_arrow tint (make_arrow tint tint),
-                     lift_binary (+));;
-let c_times = Terminal("*",
-                     make_arrow tint (make_arrow tint tint),
-                     lift_binary (fun x y ->x*y ));;
-let polynomial_library =
-  make_flat_library @@ [c_S;c_B;c_C;c_I;c_plus;c_times;c_zero;c_one;](*  @ c_numbers *);;
-
-let c_reals = List.map (0--9) ~f:(expression_of_float % Float.of_int);;
-let c_sin = Terminal("sin",
-                    make_arrow treal treal,
-                    lift_unary sin);;
-let c_cos = Terminal("cos",
-                    make_arrow treal treal,
-                    lift_unary cos);;
-let c_plus_dot = Terminal("+.",
-                     make_arrow treal (make_arrow treal treal),
-                     lift_binary (+.));;
-let c_times_dot = Terminal("*.",
-                     make_arrow treal (make_arrow treal treal),
-                     lift_binary ( *. ));;
-let fourier_library =
-  make_flat_library @@ [c_S;c_B;c_C;c_I;c_plus_dot;c_times_dot;c_sin;c_cos;] @ c_reals;;
-
-
-let c_inner_product = Terminal("dot",
-                              (TCon("list",[treal])) @>
-                              (TCon("list",[treal])) @>
-                              treal,
-                              lift_binary @@ fun x y ->
-                              (try
-                                 List.fold2_exn ~init:0. ~f:(fun a b c -> a+.b*.c) x y
-                               with _ -> 0.0));;
-
-
-let list_type = if phonetic_list then make_ground "phone" else t1;;
-let c_null = Terminal("null",canonical_type (TCon("list",[list_type])),Obj.magic (ref []));;
-let c_cons = Terminal("cons",
-                      canonical_type @@ make_arrow list_type @@
-                      make_arrow (TCon("list",[list_type])) @@ (TCon("list",[list_type])),
-                      lift_binary (fun x y -> x::y));;
-let c_rcons = Terminal("rcons",
-                      canonical_type @@ make_arrow list_type @@
-                      make_arrow (TCon("list",[list_type])) @@ (TCon("list",[list_type])),
-                      lift_binary (fun x y -> y @ [x]));;
-let c_append1 = Terminal("@1",
-                      canonical_type @@ (TCon("list",[list_type])) @> list_type @>
-                                        (TCon("list",[list_type])),
-                      lift_binary (fun y x -> y @ [x]));;
-let c_append = Terminal("@",
-                        canonical_type @@ make_arrow (TCon("list",[list_type])) @@
-                        make_arrow (TCon("list",[list_type])) @@ (TCon("list",[list_type])),
-                        lift_binary (@));;
-let c_last_one = Terminal("last-one",
-                          canonical_type @@ make_arrow (TCon("list",[list_type])) list_type,
-                          lift_unary last_one);;
-let c_cdr = Terminal("cdr",
-                    canonical_type @@ make_arrow (TCon("list",[list_type])) (TCon("list",[list_type])),
-                    lift_unary List.tl_exn);;
-let c_car = Terminal("car",
-                    canonical_type @@ make_arrow (TCon("list",[list_type])) list_type,
-                    lift_unary List.hd_exn);;
-let c_exists = Terminal("exists",
-                        canonical_type @@
-                        t4 @> t4 @> (t2 @> t2 @> list_type @> t2) @> (TCon("list",[list_type])) @> t4,
-                        (* WARNING: p is handled incorrectly. Only good for type checking and likelihoods. *)
-                        lift_reversed_predicate_2 (fun p l -> List.exists ~f:p l));;
-
-let math_list_library =
-    make_flat_library @@ [c_S;c_B;c_C;c_I;c_plus_dot;c_times_dot;c_sin;
-                          c_cos;c_null;c_cons;c_inner_product] @ c_reals;;
-
-let string_of_library (log_application,bindings) =
-  String.concat ~sep:"\n"
-    ((Float.to_string (exp log_application))::
-     (List.map bindings ~f:(fun (e,(w,t)) ->
-          Printf.sprintf "\t %f \t %s : %s " w (string_of_expression e) (string_of_type t))));;
-
-let all_terminals = ref (List.map ([c_K;c_S;c_B;c_C;c_I;c_bottom;
-                          c_sin;c_cos;c_times_dot;c_plus_dot;c_plus;c_times;c_inner_product;
-                          c_null;c_append;c_rcons;c_cons;c_append1;c_last_one;c_exists;c_car;c_cdr;]
-                                   @ c_numbers @ c_reals)
-                           ~f:(fun e -> (string_of_expression e,e)));;
-let register_terminal t =
-  all_terminals := (string_of_expression t,t) :: !all_terminals;;
-let register_terminals t = List.iter t ~f:register_terminal;;
-
-(* replaces all of the "unit references" with actual unit references. necessary for marshaling *)
-let scrub_graph (i2n,n2i,_) =
-  let substitution = ref [] in
-  Hashtbl.iteri i2n ~f:(fun ~key:i ~data:n ->
-    match n with
-    | ExpressionLeaf(Terminal(name,t,_)) when name.[0] <> '?' ->
-      let clean = ExpressionLeaf(Terminal(name,t,ref ()))
-      and dirty = n in
-      substitution := (i,clean,dirty) :: !substitution
-    | _ -> ());
-  List.iter !substitution ~f:(fun (i,c,d) ->
-    Hashtbl.set i2n ~key:i ~data:c;
-    Hashtbl.remove n2i d;
-    ignore(Hashtbl.add n2i ~key:c ~data:i))
-
-(* undoes the above operation *)
-let dirty_graph (i2n,n2i,_) =
-  let substitution = ref [] in
-  Hashtbl.iteri i2n ~f:(fun ~key:i ~data:n ->
-    match n with
-    | ExpressionLeaf(Terminal(name,_,_)) when name.[0] <> '?' ->
-      let clean = n
-      and dirty = ExpressionLeaf(List.Assoc.find_exn !all_terminals name) in
-      substitution := (i,clean,dirty) :: !substitution
-    | _ -> ());
-  List.iter !substitution ~f:(fun (i,c,d) ->
-    Hashtbl.set i2n ~key:i ~data:d;
-    Hashtbl.remove n2i c;
-    ignore(Hashtbl.add n2i ~key:d ~data:i))
+let c_S = Terminal("S", canonical_type @@
+  make_arrow (make_arrow t1 (make_arrow t2 t3))
+             (make_arrow (make_arrow t1 t2)
+                         (make_arrow t1 t3)),
+  Obj.magic (ref (fun f ->
+    Some(fun g ->
+      Some(fun x ->
+        match f with
+        | None -> None
+        | Some(f) ->
+            match f x with
+            | None -> None
+            | Some(left) ->
+                left @@ match g with
+                | None -> None
+                | Some(g) -> g x)))))
+let c_B = Terminal("B", canonical_type @@
+  make_arrow (make_arrow t2 t3)
+             (make_arrow (make_arrow t1 t2)
+                         (make_arrow t1 t3)),
+  Obj.magic (ref (fun f ->
+    Some(fun g ->
+      Some(fun x ->
+        match f with
+        | None -> None
+        | Some(f) ->
+            f @@ match g with
+            | None -> None
+            | Some(g) -> g x)))))
+let c_C = Terminal("C",  canonical_type @@
+  make_arrow (make_arrow t1 (make_arrow t2 t3))
+             (make_arrow t2 (make_arrow t1 t3)),
+  Obj.magic (ref (fun f ->
+    Some(fun g ->
+      Some(fun x ->
+        match f with
+        | None -> None
+        | Some(f) ->
+            match f x with
+            | None -> None
+            | Some(left) -> left g)))))
+let c_K = Terminal("K", canonical_type @@
+  make_arrow t1 (make_arrow t2 t1),
+  Obj.magic (ref (fun x -> Some(fun _ -> x))))
+let c_F = Terminal("F", canonical_type @@
+  make_arrow t1 (make_arrow t2 t2),
+  Obj.magic (ref (fun _ -> Some(fun x -> x))))
+let c_I = Terminal("I", canonical_type @@
+  make_arrow t1 t1,
+  Obj.magic (ref (fun x -> x)))
 
 let expression_of_string_with_combs s combs =
-  let all_terminals = ref (List.map combs ~f:(fun e -> (string_of_expression e,e))) in
+  let terminals = ref (List.map combs ~f:(fun e -> (string_of_expression e,e))) in
   let i = ref 0 in
   let rec read () =
     if !i < String.length s
@@ -369,57 +222,7 @@ let expression_of_string_with_combs s combs =
                 if name.[0] = '?'
                 then Terminal(name,t1,ref ())
                 else try
-                  List.Assoc.find_exn !all_terminals name
-                with _ -> raise (Failure ("not in all_terminals: "^name))))
+                  List.Assoc.find_exn !terminals name
+                with _ -> raise (Failure ("not in terminals: "^name))))
     else raise (Failure ("expression_of_string: "^s))
   in read ()
-
-(* parses an expression. has to be in library because needs definitions of terminals *)
-let expression_of_string s = expression_of_string_with_combs s (
-  [c_K;c_S;c_B;c_C;c_I;c_bottom;
-  c_sin;c_cos;c_times_dot;c_plus_dot;c_plus;c_times;c_inner_product;
-  c_null;c_append;c_rcons;c_cons;c_append1;c_last_one;c_exists;c_car;c_cdr;]
-  @ c_numbers @ c_reals)
-
-let load_library f =
-  let i = open_in f in
-  let log_application = Float.of_string @@ input_line i in
-  let productions = ref [] in
-  try
-    while true do
-      let l = String.strip @@ input_line i in
-      let weight_index = safe_get_some "load_library: None" @@ String.index l ' ' in
-      let w = Float.of_string @@ String.sub l ~pos:0 ~len:weight_index in
-      let e = expression_of_string @@ String.strip @@
-        String.sub l ~pos:weight_index ~len:(String.length l - weight_index) in
-      productions := (e,w) :: !productions
-    done; (0.,[])
-  with End_of_file ->
-    (log log_application, List.map !productions ~f:(fun (e,w) -> (e, (w,infer_type e))))
-
-let rec remove_lambda v = function
-  | Terminal(b,_,_) when b = v -> c_I
-  | Application(f,Terminal(b,_,_)) when b = v ->
-    if expression_has_identifier v f
-    then Application(Application(c_S,remove_lambda v f),c_I)
-    else f
-  | Application(Terminal(b,_,_),f) when b = v ->
-    if expression_has_identifier v f
-    then Application(Application(c_S,c_I),remove_lambda v f)
-    else Application(Application(c_S,c_I),f)
-  | Application(f,x) ->
-    begin
-      match (expression_has_identifier v f,
-            expression_has_identifier v x) with
-      | (true,true) ->
-        Application(Application(c_S,remove_lambda v f),
-                   remove_lambda v x)
-      | (false,true) ->
-        Application(Application(c_B,f),remove_lambda v x)
-      | (true,false) ->
-        Application(Application(c_C,remove_lambda v f),x)
-      | (false, false) ->
-        Application(c_K,Application(f,x))
-    end
-  (* only possibility is terminal not matching v *)
-  | t -> Application(c_K,t)

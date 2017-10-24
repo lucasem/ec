@@ -8,10 +8,11 @@ type task_objective =
   | LogLikelihood of (expression -> float)
   | Seed of expression
 
-type task =
-    { name : string; task_type : tp;
-    score : task_objective;
-    proposal : ((expression -> float -> float) * (expression*float) list) option; }
+type task = {
+  name : string; task_type : tp;
+  score : task_objective;
+  proposal : ((expression -> float -> float) * (expression*float) list) option;
+}
 
 let task_likelihood t =
   match t.score with
@@ -26,8 +27,7 @@ let modify_grammar grammar t =
     extra @
     (List.map (snd grammar) ~f:(fun (e, (w,ty)) -> (e,(propose e w,ty))) |>
      List.filter ~f:(not % List.Assoc.mem extra ~equal:expression_equal % fst))
-  in
-  (fst grammar,special_weights)
+  in (fst grammar,special_weights)
 
 let score_programs dagger frontiers tasks =
   parallel_map tasks ~f:(fun task ->

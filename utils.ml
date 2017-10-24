@@ -1,59 +1,37 @@
 open Core.Std
-open Sys
 
 
-let compose f g = fun x -> f (g x);;
-let (%) = compose;;
+let (%) f g = fun x -> f (g x)
+
+let time () = Time.to_float @@ Time.now ()
 
 let is_some = function
   | None -> false
-  | _ -> true;;
+  | _ -> true
 let get_some = function
   | Some(x) -> x
-  | _ -> raise (Failure "get_some");;
+  | _ -> raise (Failure "get_some")
 let safe_get_some message = function
   | Some(x) -> x
-  | _ -> raise (Failure message);;
-
-let memorize f =
-  let table = Hashtbl.Poly.create () in
-  fun x ->
-    match Hashtbl.Poly.find table x with
-    | Some(y) -> y
-    | None ->
-      let y = f x in
-      ignore(Hashtbl.Poly.add table ~key:x ~data:y);
-      y
+  | _ -> raise (Failure message)
 
 let maximum_by ~cmp l =
   List.fold_left ~init:(List.hd_exn l) (List.tl_exn l) ~f:(fun a b ->
       if cmp a b > 0
       then a else b)
 
-let rec map_list f = function
-  | [] -> [f []]
-  | (x :: xs) -> (f (x :: xs)) :: (map_list f xs)
-
-let is_invalid (x : float) = x <> x || x = Float.infinity || x = Float.neg_infinity;;
-let is_valid = compose not is_invalid;;
+let is_invalid (x : float) = x <> x || x = Float.infinity || x = Float.neg_infinity
+let is_valid = not % is_invalid
 
 let rec last_one = function
   | [] -> raise (Failure "last_one: empty")
   | [x] -> x
   | _::y -> last_one y
 
-let index_of l x =
-  let rec loop a r =
-    match r with
-      [] -> raise (Failure "index_of: not found")
-    | (y::ys) -> if y = x then a else loop (a+1) ys
-  in loop 0 l
-
 let set_equal c x y =
   let x = List.sort ~cmp:c x
   and y = List.sort ~cmp:c y in
   List.compare c x y = 0
-
 
 let log2 = log 2.
 
@@ -63,15 +41,8 @@ let lse x y =
   then x +. log (1.0 +. exp (y-.x))
   else y +. log (1.0 +. exp (x-.y))
 
-
 let lse_list (l : float list) : float =
   List.fold_left l ~f:lse ~init:Float.neg_infinity
-
-(* log difference exponential: log(e^x - e^y) = x+log(1-e^(y-x)) *)
-let lde x y =
-  assert(x >= y);
-  x +. log (1. -. exp (y-.x))
-
 
 let rec remove_duplicates l =
   match l with
@@ -90,45 +61,10 @@ let merge_a_list ls ~f:c =
     );
   Hashtbl.to_alist merged
 
-
-let combine_with f _ a b =
-  match (a,b) with
-  | (None,_) -> b
-  | (_,None) -> a
-  | (Some(x),Some(y)) -> Some(f x y)
-
-
 let (--) i j =
   let rec aux n acc =
     if n < i then acc else aux (n-1) (n :: acc)
   in aux j []
-
-let float_interval (i : float) (s : float) (j : float) : float list =
-  let rec aux n acc =
-    if n < i then acc else aux (n-.s) (n :: acc)
-  in aux j []
-
-let time () = Time.to_float @@ Time.now ()
-
-let time_it description callback =
-  let start_time = time () in
-  let return_value = callback () in
-  return_value
-
-(* progress bar *)
-type progress_bar = { maximum_progress : int; mutable current_progress : int; }
-
-let make_progress_bar number_jobs =
-  { maximum_progress = number_jobs; current_progress = 0; }
-
-let update_progress_bar bar new_progress =
-  let max = Float.of_int bar.maximum_progress in
-  let old_dots = Int.of_float @@ Float.of_int bar.current_progress *. 80.0 /. max in
-  let new_dots = Int.of_float @@ Float.of_int new_progress *. 80.0 /. max in
-  bar.current_progress <- new_progress;
-  if new_dots > old_dots then
-    let difference = min 80 (new_dots-old_dots) in
-    List.iter (1--difference) ~f:(fun _ -> Printf.eprintf "%c" '.'; flush stderr)
 
 (* paralleled map *)
 let pmap ?processes:(processes=4) ?bsize:(bsize=0) f input output =
@@ -186,9 +122,8 @@ let pmap ?processes:(processes=4) ?bsize:(bsize=0) f input output =
   done;
   output
 
-
-let number_of_cores = ref 1;; (* number of CPUs *)
-let counted_CPUs = ref false;; (* have we counted the number of CPUs? *)
+let number_of_cores = ref 1 (* number of CPUs *)
+let counted_CPUs = ref false (* have we counted the number of CPUs? *)
 
 let cpu_count () =
   try match Sys.os_type with
@@ -200,7 +135,6 @@ let cpu_count () =
       with
       | Not_found | Sys_error _ | Failure _ | Scanf.Scan_failure _
       | End_of_file | Unix.Unix_error (_, _, _) -> 1
-
 
 let parallel_map l ~f =
   flush stdout;
@@ -221,14 +155,6 @@ let parallel_map l ~f =
     flush stdout;
     Array.to_list output_array |> List.map ~f:(safe_get_some "parallel_map")
 
-
-let string_proper_prefix p s =
-  let rec loop n =
-    (n >= String.length p) ||
-    (p.[n] = s.[n] && loop (n+1))
-  in
-  String.length p < String.length s && loop 0
-
 let rec remove_index i l =
   match (i,l) with
   | (0,x::xs) -> (x,xs)
@@ -236,35 +162,18 @@ let rec remove_index i l =
     (j,x::ys)
   | _ -> raise (Failure "remove_index")
 
-let rec random_subset l = function
-  | 0 -> l
-  | s ->
-    let i = Random.int (List.length l) in
-    let (ith,r) = remove_index i l in
-    ith :: (random_subset r (s-1))
-
-let avg l =
-  List.fold_left ~init:0.0 ~f:(+.) l /. (Float.of_int @@ List.length l)
-
 let pi = 4.0 *. atan 1.0
 
+(* samplers adapted from gsl *)
 let normal s m =
   let u, v = Random.float 1.0, Random.float 1.0
   in let n = sqrt (-2.0 *. log u) *. cos (2.0 *. pi *. v)
   in
   s *. n +. m
 
-let print_arguments () = ()
-  (* NOOP
-  Array.iter Sys.argv ~f:(fun a -> Printf.printf "%s " a);
-  print_newline ()
-  *)
-
-(* samplers adapted from gsl *)
 let rec uniform_positive () =
   let u = Random.float 1.0 in
   if u > 0.0 then u else uniform_positive ()
-
 
 let rec sample_gamma a b =
   if a < 1.0
@@ -288,7 +197,6 @@ let rec sample_gamma a b =
       then b *. d *. v
       else loop ()
     in loop ()
-
 
 let sample_uniform_dirichlet a n =
   let ts = List.map (1--n) ~f:(fun _ -> sample_gamma a 1.0) in

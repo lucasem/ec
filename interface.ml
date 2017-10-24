@@ -24,7 +24,7 @@ let get_some = Utils.get_some
 
 module Str = struct
   include Core.Std.String
-end;;
+end
 
 module List = struct
   include Core.Std.List
@@ -32,7 +32,7 @@ module List = struct
     match List.nth l i with
       | Some(x) -> x
       | None -> default
-end;;
+end
 
 module C = struct
   let _S = Library.c_S
@@ -41,7 +41,7 @@ module C = struct
   let _I = Library.c_I
   let _K = Library.c_K
   let prims = [_S;_B;_C;_I;_K]
-end;;
+end
 
 module Lift = struct
   let unary = Expression.lift_unary
@@ -49,7 +49,7 @@ module Lift = struct
   let trinary = Expression.lift_trinary
   let quadinary = Expression.lift_quadinary
   let predicate = Expression.lift_predicate
-end;;
+end
 
 module T = struct
   type t = Type.tp = TID of int | TCon of string * t list
@@ -59,7 +59,7 @@ module T = struct
   let b = make "bool"
   let s = make "string"
   let c = make "char"
-end;;
+end
 
 module Expr = struct
   type e = Expression.expression = Terminal of string * T.t * unit ref | Application of e * e
@@ -68,7 +68,7 @@ module Expr = struct
   let of_str s = Terminal(s, T.s, Obj.magic (ref s))
   let to_str e = Expression.string_of_expression e
   let unmarshal prims = Library.expression_of_string_with_combs prims
-end;;
+end
 
 module Task = struct
   type objective = Task.task_objective = LogLikelihood of (Expr.e -> float) | Seed of Expr.e
@@ -78,8 +78,7 @@ module Task = struct
     score : objective;
     proposal : ((Expr.e -> float -> float) * (Expr.e*float) list) option;
   }
-end;;
-
+end
 
 let ec
     initial_primitives
@@ -102,7 +101,7 @@ let ec
   and p = ref (None) in
   for it = 1 to iterations do
     let l = if it < iterations then lambda else lambda_final in
-    let ng, np, nbic = Em.expectation_maximization_iteration
+    let ng, np, _nbic = Em.expectation_maximization_iteration
         l smoothing frontier_size tasks (!g) in
     g := ng;
     p := Some(np)
@@ -110,12 +109,8 @@ let ec
   let grammar = List.map (snd !g) ~f:(fun (e,(l,_)) -> (Expr.to_str e,l))
   and progs = get_some !p in
   grammar, progs
-;;
-
 
 type 'a problem = { i: Expr.e; o: 'a }
-;;
-
 
 let task_of_problems problems ~t ~name =
   let single_score_func e p logl =
@@ -137,4 +132,3 @@ let task_of_problems problems ~t ~name =
     score = LogLikelihood(score_func);
     proposal = None;
   }
-;;

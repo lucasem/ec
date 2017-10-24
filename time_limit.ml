@@ -2,8 +2,8 @@
 
 open Unix
 
-exception Timeout;;
-let sigalrm_handler = Sys.Signal_handle (fun _ -> raise Timeout);;
+exception Timeout
+let sigalrm_handler = Sys.Signal_handle (fun _ -> raise Timeout)
 let run_for_interval (time : float) (c : unit -> 'a option) : 'a option =
   let old_behavior = Sys.signal Sys.sigalrm sigalrm_handler in
    let reset_sigalrm () = Sys.set_signal Sys.sigalrm old_behavior
