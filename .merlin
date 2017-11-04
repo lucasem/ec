@@ -1,6 +1,0 @@
-S .
-B _build
-PKG core
-PKG async
-PKG core_extended
-EXT nonrec
