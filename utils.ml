@@ -1,9 +1,7 @@
-open Core.Std
+open Core
 
 
 let (%) f g = fun x -> f (g x)
-
-let time () = Time.to_float @@ Time.now ()
 
 let is_some = function
   | None -> false
@@ -69,7 +67,8 @@ let (--) i j =
 (* paralleled map *)
 let pmap ?processes:(processes=4) ?bsize:(bsize=0) f input output =
   if processes = 0 then begin
-        Printf.eprintf "WARNING: processes = 0\n"; flush stderr
+        Printf.eprintf "WARNING: processes = 0\n";
+        Out_channel.flush stderr
   end ;
   let bsize = match bsize with
     | 0 -> Array.length output / processes
@@ -94,7 +93,7 @@ let pmap ?processes:(processes=4) ?bsize:(bsize=0) f input output =
           let chan = Unix.out_channel_of_descr wt in
           Marshal.to_channel chan (start_idx, answer) [Marshal.Closures];
           Out_channel.close chan;
-          flush stdout;
+          Out_channel.flush stdout;
           exit 0
         end
       | `In_the_parent(pid) -> begin
@@ -109,7 +108,7 @@ let pmap ?processes:(processes=4) ?bsize:(bsize=0) f input output =
         ~write:[] ~except:[] ~timeout:`Never () in
     List.iter ~f:(fun descr ->
         let chan = Unix.in_channel_of_descr descr in
-        let pid = List.Assoc.find_exn !in_streams descr in
+        let pid = List.Assoc.find_exn !in_streams ~equal:(=) descr in
         let receive_answer () =
           let start_idx, answer = Marshal.from_channel chan in
           ignore (Unix.waitpid pid);
@@ -118,7 +117,7 @@ let pmap ?processes:(processes=4) ?bsize:(bsize=0) f input output =
           total_computed := Array.length answer + !total_computed
         in try receive_answer () with End_of_file -> Printf.eprintf "got EOF from child")
       recvs.read;
-    in_streams := List.filter ~f:(fun (stream,_) -> not (List.mem recvs.read stream)) !in_streams;
+    in_streams := List.filter ~f:(fun (stream,_) -> not (List.mem recvs.read stream ~equal:(=))) !in_streams;
   done;
   output
 
@@ -127,17 +126,18 @@ let counted_CPUs = ref false (* have we counted the number of CPUs? *)
 
 let cpu_count () =
   try match Sys.os_type with
-    | "Win32" -> int_of_string (safe_get_some "CPU_count" @@ Sys.getenv "NUMBER_OF_PROCESSORS")
-    | _ ->
+  | "Win32" -> int_of_string (safe_get_some "CPU_count" @@ Sys.getenv "NUMBER_OF_PROCESSORS")
+  | _ ->
       let i = Unix.open_process_in "getconf _NPROCESSORS_ONLN" in
       let close () = ignore (Unix.close_process_in i) in
-      try Scanf.fscanf i "%d" (fun n -> close (); n) with e -> close (); raise e
-      with
-      | Not_found | Sys_error _ | Failure _ | Scanf.Scan_failure _
-      | End_of_file | Unix.Unix_error (_, _, _) -> 1
+      try Scanf.bscanf (Scanf.Scanning.from_channel i) "%d" (fun n -> close (); n)
+      with e -> close (); raise e
+  with
+  | Not_found | Sys_error _ | Failure _ | Scanf.Scan_failure _
+  | End_of_file | Unix.Unix_error (_, _, _) -> 1
 
 let parallel_map l ~f =
-  flush stdout;
+  Out_channel.flush stdout;
   if not !counted_CPUs
   then begin
     number_of_cores := cpu_count ();
@@ -152,7 +152,7 @@ let parallel_map l ~f =
       pmap ~processes:(min (Array.length input_array) !number_of_cores)
         (fun x -> Some(f x)) (Array.get input_array) output_array
     in
-    flush stdout;
+    Out_channel.flush stdout;
     Array.to_list output_array |> List.map ~f:(safe_get_some "parallel_map")
 
 let rec remove_index i l =
@@ -162,12 +162,12 @@ let rec remove_index i l =
     (j,x::ys)
   | _ -> raise (Failure "remove_index")
 
-let pi = 4.0 *. atan 1.0
+let pi = 4.0 *. Float.atan 1.0
 
 (* samplers adapted from gsl *)
 let normal s m =
   let u, v = Random.float 1.0, Random.float 1.0
-  in let n = sqrt (-2.0 *. log u) *. cos (2.0 *. pi *. v)
+  in let n = sqrt (-2.0 *. log u) *. Float.cos (2.0 *. pi *. v)
   in
   s *. n +. m
 
@@ -207,6 +207,6 @@ let make_random_seeds n =
   let rec seeds others m =
     if m = 0 then others else
       let r = Random.bits () in
-      if List.mem others r then seeds others m
+      if List.mem others r ~equal:(=) then seeds others m
           else seeds (r::others) (m-1)
   in seeds [] n

@@ -2,9 +2,9 @@
 
 Clone the repo and make sure you have the correct setup:
 ```
-opam switch 4.02.3
+opam switch 4.06.0
 eval `opam config env`
-opam install core.113.33.03 yojson
+opam install core.v0.9.2 yojson
 ```
 
 # Build

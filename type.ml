@@ -1,4 +1,4 @@
-open Core.Std
+open Core
 
 module TypeMap = Map.Make(Int)
 
@@ -81,7 +81,7 @@ let can_unify (t1 : tp) (t2 : tp) : bool =
     let rec make_fast_type dictionary t =
       match t with
       | TID(i) ->
-        (match List.Assoc.find !dictionary i with
+        (match List.Assoc.find !dictionary ~equal:(=) i with
          | None -> let f = FID(ref None) in dictionary := (i,f)::!dictionary; f
          | Some(f) -> f)
       | TCon(k,xs) ->
@@ -121,7 +121,7 @@ let instantiate_type (n,m) t =
   let next = ref n in
   let rec instantiate j =
     match j with
-    | TID(i) -> (try TID(List.Assoc.find_exn !substitution i)
+    | TID(i) -> (try TID(List.Assoc.find_exn !substitution ~equal:(=) i)
                  with Not_found ->
                    substitution := (i,!next)::!substitution; next := (1+ !next); TID(!next-1)
                 )
@@ -135,7 +135,7 @@ let canonical_type t =
   let substitution = ref [] in
   let rec canon q =
     match q with
-    | TID(i) -> (try TID(List.Assoc.find_exn !substitution i)
+    | TID(i) -> (try TID(List.Assoc.find_exn !substitution ~equal:(=) i)
                  with Not_found ->
                    substitution := (i,!next)::!substitution; next := (1+ !next); TID(!next-1))
     | TCon(k,a) -> TCon(k,List.map ~f:canon a)

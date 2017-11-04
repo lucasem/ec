@@ -73,9 +73,9 @@ let main it lambda smoothing frontier_size file () =
     @@ json_of_ec_results grammar progs hit_rate
 
 let command =
-  Core.Std.Command.basic
+  Core.Command.basic
     ~summary:"run EC on the given tasks (see file format at github.com/lucasem/ec)"
-    Core.Std.Command.Spec.(
+    Core.Command.Spec.(
       empty
       +> flag "-it" (optional_with_default 5 int) ~doc:"integer Number of iterations (default: 5)"
       +> flag "-lambda" (optional_with_default 1.5 float) ~doc:"float Grammar learning cutoff (lower ~ more eager learning) (default: 1.5)"
@@ -85,4 +85,4 @@ let command =
     )
     main
 
-let () = Core.Std.Command.run ~version:"1.0" command
+let () = Core.Command.run ~version:"1.0" command

@@ -1,4 +1,4 @@
-open Core.Std
+open Core
 
 open Expression
 open Type
@@ -222,7 +222,7 @@ let expression_of_string_with_combs s combs =
                 if name.[0] = '?'
                 then Terminal(name,t1,ref ())
                 else try
-                  List.Assoc.find_exn !terminals name
+                  List.Assoc.find_exn !terminals ~equal:(=) name
                 with _ -> raise (Failure ("not in terminals: "^name))))
     else raise (Failure ("expression_of_string: "^s))
   in read ()

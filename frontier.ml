@@ -1,4 +1,4 @@
-open Core.Std
+open Core
 
 open Type
 open Library
@@ -14,7 +14,7 @@ let frontier_requests frontiers =
           ~f:(fun (a : (tp list) Int.Map.t) (i,_dt) ->
               match Int.Map.find a i with
               | Some(old) ->
-                if List.mem old requested_type then a
+                if List.mem old requested_type ~equal:(=) then a
                 else Int.Map.add a ~key:i ~data:(requested_type::old)
               | None -> Int.Map.add a ~key:i ~data:[requested_type]))
 

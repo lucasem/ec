@@ -1,4 +1,4 @@
-open Core.Std
+open Core
 
 open Expression
 open Type
@@ -34,7 +34,7 @@ let score_programs dagger frontiers tasks =
       let ll = match task.score with
       | Seed(_) -> raise (Failure "score_programs: task has seed")
       | LogLikelihood(ll) -> ll in
-      List.filter_map (List.Assoc.find_exn frontiers task.task_type)
+      List.filter_map (List.Assoc.find_exn frontiers ~equal:(=) task.task_type)
         ~f:(fun (i,dt) ->
             let e = extract_expression dagger i in
             let l = ll e in

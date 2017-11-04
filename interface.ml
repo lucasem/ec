@@ -1,8 +1,8 @@
-open Core.Std
+open Core
 
 (* EXPORTS:
-  * module Str    (* Core.Std.String *)
-  * module List   (* Core.Std.List *)
+  * module Str    (* Core.String *)
+  * module List   (* Core.List *)
   * module C      (* combinators (primitive) *)
   * module Lift   (* for expression terminal from function *)
   * module T      (* types *)
@@ -23,11 +23,11 @@ let get_some = Utils.get_some
 
 
 module Str = struct
-  include Core.Std.String
+  include Core.String
 end
 
 module List = struct
-  include Core.Std.List
+  include Core.List
   let nth_or_default ?default:(default="" ) l i =
     match List.nth l i with
       | Some(x) -> x
@@ -117,7 +117,7 @@ let task_of_problems problems ~t ~name =
     let q = Expr.Application(e, p.i) in
     match Expr.run q with
     | Some(r) when r = p.o -> logl
-    | _ -> Core.Std.Float.neg_infinity
+    | _ -> Core.Float.neg_infinity
   in
   let score_func = (fun (e : Expr.e) ->
     let rec r y =

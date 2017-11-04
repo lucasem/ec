@@ -1,4 +1,4 @@
-open Core.Std
+open Core
 
 open Library
 open Expression
@@ -37,8 +37,8 @@ let enumerate_bounded ?prune:(prune = do_not_prune) (* testing of expressions as
                 let my_type = application_type fun_type arg_type in
                 let my_general_type = application_type fun_general_type arg_general_type in
                 let reified_type = instantiated_type my_type requestedType in
-                if not ((reduce_symmetries && List.mem type_blacklist my_type) || not (is_some reified_type)
-                        || (reduce_symmetries && List.mem type_blacklist my_general_type))
+                if not ((reduce_symmetries && List.mem type_blacklist my_type ~equal:(=)) || not (is_some reified_type)
+                        || (reduce_symmetries && List.mem type_blacklist my_general_type ~equal:(=)))
                 then k (Application(f,x))
                     (arg_l+.fun_l+.log_application) (get_some reified_type)
                     my_general_type
@@ -46,10 +46,11 @@ let enumerate_bounded ?prune:(prune = do_not_prune) (* testing of expressions as
         with _ -> () (* type error *))
   in
   let hits = Int.Table.create () in
-  let start_time = time () in
+  let start_time = Time.now () in
   enumerate true rt bound (fun i _ _ _ ->
       if not (prune i) then
-        Hashtbl.set hits ~key:(insert_expression dagger i) ~data:((time ())-.start_time)
+        let dt = Time.Span.to_sec @@ Time.diff (Time.now ()) start_time in
+        Hashtbl.set hits ~key:(insert_expression dagger i) ~data:dt
       else incr number_pruned);
   (Hashtbl.to_alist hits, !number_pruned)
 
