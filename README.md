@@ -9,14 +9,19 @@ opam install core.v0.9.2 yojson
 
 # Build
 
-The makefile provides a default of building the `./ec` binary, so running
-`make` should be all you need. You can also run the program with the example
-task set in `./flashfill.json` using `make run`.
+The makefile provides a default of building both the `./str` binary for
+**string transformations** and the `./list` binary for **list functions**.
+Running `make` should be all you need.
+
+You can also run the program with the example string transformation task set
+in `./flashfill.json` using `make run`, or by following the usage explained
+below.
 
 # Usage
 
 The **`ec`** binary takes one argument: the filename of a json file. The
-results are formatted in json and sent to stdout.
+results are formatted in json and sent to stdout. If the filename is `-`,
+stdin is used to read the json input.
 
 ### Settings
 
@@ -41,9 +46,8 @@ Each item in the `grammar` list is an object with a single field, `expr`,
 that points to a string representing a combinator. Each item in the `tasks`
 list is an object with three fields: a unique `name`, and `test` and `train`
 which point to arrays of problems which must be satisfied by the same
-learned program. These problems are objects with two string fields, `i` and
-`o` corresponding to input and output for the program. Here's a simple
-example:
+learned program. These problems are objects with two fields, `i` and `o`
+corresponding to input and output for the program. Here's a simple example:
 ```json
 { "grammar": [
     { "expr":"(C nth)" },
@@ -109,7 +113,7 @@ Here's a simple example:
       }
     }
   ],
-  "hit_rate": 3
+  "hit_rate": 2
 }
 ```
 

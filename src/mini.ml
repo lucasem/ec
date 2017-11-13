@@ -1,6 +1,6 @@
 open Interface
 
-let prims = C.prims @ Str_ops.combs
+let prims = C.prims @ Combs_str.combs
 
 let main () =
   let s = "((B ((B ((replace-substr-all empty) (string-of-char <SPACE>))) (feach ((substr 0) (+1 0))))) (filter-words ((S is) cap)))" in

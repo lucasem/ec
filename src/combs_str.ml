@@ -1,10 +1,10 @@
 open Interface
 
 (* basic string ops *)
-let c_empty = Expr.Terminal("empty", T.s, Obj.magic (ref ""))
-let c_up    = Expr.Terminal("upper", T.arrow T.s T.s, Lift.unary Str.uppercase)
-let c_low   = Expr.Terminal("lower", T.arrow T.s T.s, Lift.unary Str.lowercase)
-let c_cap   = Expr.Terminal("cap", T.arrow T.s T.s, Lift.unary Str.capitalize)
+let c_empty  = Expr.Terminal("empty", T.s, Obj.magic (ref ""))
+let c_up     = Expr.Terminal("upper", T.arrow T.s T.s, Lift.unary Str.uppercase)
+let c_low    = Expr.Terminal("lower", T.arrow T.s T.s, Lift.unary Str.lowercase)
+let c_cap    = Expr.Terminal("cap", T.arrow T.s T.s, Lift.unary Str.capitalize)
 let c_concat = Expr.Terminal("+", T.arrow T.s (T.arrow T.s T.s), Lift.binary (^))
 
 (* ints *)
@@ -52,30 +52,30 @@ let replace t i j s =
 let c_replace = Expr.Terminal("replace", T.arrow T.s (T.arrow T.i (T.arrow T.i (T.arrow T.s T.s))), Lift.quadinary replace)
 
 let nth i s =
-  let parts = Str.split ~on:' ' s in
-  let i = i + (if i<0 then List.length parts else 0)
-  in List.nth_or_default (Str.split s ~on:' ') i
+  let words = Str.split ~on:' ' s in
+  let i = i + (if i<0 then List.length words else 0)
+  in List.nth_or_default words i
 let c_nth = Expr.Terminal("nth", T.arrow T.i (T.arrow T.s T.s), Lift.binary nth)
 
 let fnth f i s =
-  let parts = Str.split ~on:' ' s in
-  let i = i + (if i<0 then List.length parts else 0) in
-  let newParts = List.mapi ~f:(fun j v -> if j == i then f (Some(v)) else Some(v)) parts in
-  let unpackedParts = if List.for_all newParts ~f:is_some then List.map newParts ~f:get_some else parts
-  in Str.concat ~sep:" " unpackedParts
+  let words = Str.split ~on:' ' s in
+  let i = i + (if i<0 then List.length words else 0) in
+  let new_words = List.mapi ~f:(fun j v -> if j == i then f (Some(v)) else Some(v)) words in
+  let unpacked = if List.for_all new_words ~f:is_some then List.map new_words ~f:get_some else words
+  in Str.concat ~sep:" " unpacked
 let c_fnth = Expr.Terminal("fnth", T.arrow (T.arrow T.s T.s) (T.arrow T.i (T.arrow T.s T.s)), Lift.trinary fnth)
 
 let feach f s =
-  let parts = Str.split ~on:' ' s in
-  let newParts = List.mapi ~f:(fun _ v -> f (Some(v))) parts in
-  let unpackedParts = if List.for_all newParts ~f:is_some then List.map newParts ~f:get_some else parts
-  in Str.concat ~sep:" " unpackedParts
+  let words = Str.split ~on:' ' s in
+  let new_words = List.map ~f:(fun v -> f (Some(v))) words in
+  let unpacked = if List.for_all new_words ~f:is_some then List.map new_words ~f:get_some else words
+  in Str.concat ~sep:" " unpacked
 let c_feach = Expr.Terminal("feach", T.arrow (T.arrow T.s T.s) (T.arrow T.s T.s), Lift.binary feach)
 
 let filter_words f s =
-  let parts = Str.split ~on:' ' s in
-  let newParts = List.filter ~f:(fun v -> get_some (f (Some(v)))) parts
-  in Str.concat ~sep:" " newParts
+  let words = Str.split ~on:' ' s in
+  let new_words = List.filter ~f:(fun v -> get_some (f (Some(v)))) words
+  in Str.concat ~sep:" " new_words
 let c_filter_words = Expr.Terminal("filter-words", T.arrow (T.arrow T.s T.b) (T.arrow T.s T.s), Lift.binary filter_words)
 
 let combs = [

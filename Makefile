@@ -1,23 +1,27 @@
 C = corebuild
 
 src := $(wildcard ./*.ml)
-entry = main.native
-mini = mini.native
+variants = str list
+mini = src/mini.native
 
 
-default: ec
+default: str list ec
 
-ec: $(src)
-	$(C) -pkg yojson -quiet $(entry)
-	cp `readlink $(entry)` ec
-	$(RM) $(entry)
+ec: str
+	@$(RM) ec
+	ln -s str ec
+
+$(variants): $(src)
+	$(C) -pkg yojson -I src/ec -quiet src/main_$@.native
+	cp `readlink main_$@.native` $@
+	$(RM) main_$@.native
 
 results: ec
 	./results/mk_data.sh
 	@echo "results produced in results/data.tsv and results/learning_curves.eps"
 
 mini: $(src)
-	$(C) -pkg yojson -quiet $(mini)
+	$(C) -pkg yojson -I src/ec -quiet $(mini)
 	@echo "running mini:"
 	@./$(mini)
 	@echo ""

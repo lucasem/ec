@@ -5,7 +5,7 @@
 cd $(dirname ${BASH_SOURCE[0]})
 
 EC=../ec
-INPUT=../flashfill.json
+INPUT=../data/flashfill.json
 OUTPUT=data.tsv
 
 if [ ! -f $EC ]

@@ -59,6 +59,7 @@ module T = struct
   let b = make "bool"
   let s = make "string"
   let c = make "char"
+  let l = make "list"
 end
 
 module Expr = struct
@@ -66,6 +67,7 @@ module Expr = struct
   let run q = Expression.run_expression_for_interval 0.1 q
   let of_int n = Terminal(string_of_int n, T.i, Obj.magic (ref n))
   let of_str s = Terminal(s, T.s, Obj.magic (ref s))
+  let of_list l = Terminal(List.to_string ~f:string_of_int l, T.l, Obj.magic (ref l))
   let to_str e = Expression.string_of_expression e
   let unmarshal prims = Library.expression_of_string_with_combs prims
 end
