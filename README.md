@@ -17,7 +17,7 @@ You can also run the program with the example string transformation task set
 in `./flashfill.json` using `make run`, or by following the usage explained
 below.
 
-# Usage
+# Usage (command-line)
 
 The **`ec`** binary takes one argument: the filename of a json file. The
 results are formatted in json and sent to stdout. If the filename is `-`,
@@ -117,7 +117,60 @@ Here's a simple example:
 }
 ```
 
-# Mini
+### Mini
 
 A convience build `make mini`, corresponding to [`./mini.ml`](./mini.ml),
 helps to quickly test and use expressions.
+
+# Usage (python)
+
+To install the python package, you must be using python 3.
+Clone this repository and execute the following:
+
+```bash
+$ pip install -e ec/py
+```
+
+This gives you the `ecalgorithm` python module.
+
+```py
+import ecalgorithm as ec
+
+# set the appropriate EC binary:
+ec.string_transformations()
+#ec.list_functions()
+
+tasks = [
+    ec.Task("IaN -> Ian", [
+        ("IaN", "Ian"),
+        ("MELVIN", "Melvin"),
+    ]),
+    ec.Task("upper first", [
+        ("some input", "SOME input"),
+    ], test=[ # optional test examples
+        ("yet another example", "YET another example")
+    ]),
+]
+
+# outputs a python dict corresponding to the
+# JSON output from command-line usage
+output = ec.run(tasks,
+    frontier_size=5000,
+    it=3,
+    lambd=1.0,
+    smoothing=1.0,
+)
+
+for t in output["programs"]:
+    name = t["task"]
+    if t["result"] is None:
+        print(f"task {name} failed")
+        continue
+    expr = t["result"]["expr"] # string of combinatory logic expression
+    print(f"task {name} solution: {expr}")
+
+"""stdout:
+task IaN -> Ian solution: ((B cap) lower)
+task upper first solution: ((fnth upper) 0)
+"""
+```
