@@ -7,63 +7,75 @@ open Utils
 open Task
 
 
-let reduce_symmetries = true
 let always_sampled_prior = false
-let do_not_prune _e = false
 
-let enumerate_bounded ?prune:(prune = do_not_prune) (* testing of expressions as they are generated *)
-    dagger (log_application,distribution) rt bound =
-  let number_pruned = ref 0 in
-  let log_terminal = log (1.0-. exp log_application) in
-  let terminals = List.map distribution ~f:(fun (e,(l,t)) -> (t,(e, l))) in
-  let type_blacklist = TID(0) :: ([c_S;c_B;c_C;c_K;c_F;c_I] |> List.map ~f:terminal_type) in
-  let rec enumerate can_identify requestedType budget k =
-    (* first do the terminals *)
-    let availableTerminals = List.filter terminals ~f:(fun (t,(e,_)) ->
-        can_unify t requestedType && (not (reduce_symmetries) || can_identify || compare_expression c_I e <> 0)) in
-    let z = lse_list (List.map availableTerminals ~f:(fun (_,(_,l)) -> l)) in
-    let availableTerminals = List.map availableTerminals ~f:(fun (t,(e,l)) -> (t,(e,l-.z))) in
-    let availableTerminals = List.filter availableTerminals ~f:(fun (_,(_,l)) -> 0.0-.log_terminal-.l < budget) in
-    List.iter availableTerminals ~f:(fun (t,(e,l)) ->
-        let it = safe_get_some "enumeration: availableTerminals" (instantiated_type t requestedType) in
-        k e (log_terminal+.l) it t);
-    if budget > -.log_application then
-    let f_request = TID(next_type_variable requestedType) @> requestedType in
-    enumerate false f_request (budget+.log_application) (fun f fun_l fun_type fun_general_type ->
-        try
-          let x_request = argument_request requestedType fun_type in
-          enumerate true x_request (budget+.log_application+.fun_l) (fun x arg_l arg_type arg_general_type ->
-              try
-                let my_type = application_type fun_type arg_type in
-                let my_general_type = application_type fun_general_type arg_general_type in
-                let reified_type = instantiated_type my_type requestedType in
-                if not ((reduce_symmetries && List.mem type_blacklist my_type ~equal:(=)) || not (is_some reified_type)
-                        || (reduce_symmetries && List.mem type_blacklist my_general_type ~equal:(=)))
-                then k (Application(f,x))
-                    (arg_l+.fun_l+.log_application) (get_some reified_type)
-                    my_general_type
-              with _ -> () (* type error *))
-        with _ -> () (* type error *))
+let enumerate_bounded
+  (dagger : expressionGraph)
+  ((l_application : float),
+   (distribution : (expression*(float*tp)) list))
+  (tp_req: tp)
+  (bound : float)
+  : (int(*graph index for matching expression*)*float(*time to enumerate*)) list =
+  let l_terminal = log (1.0-. exp l_application)
+  and type_blacklist = TID(0) :: ([c_S;c_B;c_C;c_K;c_F;c_I] |> List.map ~f:terminal_type) in
+  let rec enumerate
+    (tp_req : tp)
+    (allow_identity : bool)
+    (budget : float)
+    (callback : expression->float(*loglikelihood*)->tp(*type*)->tp(*general type*)->unit)
+    =
+    (* terminals *)
+    let terminals = List.filter distribution ~f:(fun (e,(_,t)) ->
+      can_unify t tp_req &&
+      (allow_identity || not (compare_expression c_I e = 0))) in
+    let z = lse_list @@ List.map terminals ~f:(fun (_,(l,_)) -> l) in
+    List.iter terminals ~f:(fun (e,(l,t)) ->
+      let l = l_terminal+.l-.z in
+      if -.l < budget then
+        let it = get_some (instantiated_type t tp_req) in
+        callback e l it t);
+    (* nonterminals *)
+    if -.l_application < budget then
+    let tp_f_req = make_arrow (new_type_variable tp_req) tp_req in
+    enumerate tp_f_req false (budget+.l_application) (fun f l_f tp_f tp_f_general ->
+      let tp_x_req = argument_request tp_req tp_f in
+      enumerate tp_x_req true (budget+.l_application+.l_f) (fun x l_x tp_x tp_x_general ->
+        let tp_this = application_type tp_f tp_x
+        and tp_general = application_type tp_f_general tp_x_general in
+        let tp_reified = instantiated_type tp_this tp_req in
+        if (is_some tp_reified
+          && not (List.mem type_blacklist tp_this ~equal:(=))
+          && not (List.mem type_blacklist tp_general ~equal:(=)))
+        then
+          let e = Application(f,x)
+          and l = l_application +. l_f +. l_x in
+          callback e l (get_some tp_reified) tp_general))
   in
-  let hits = Int.Table.create () in
-  let start_time = Time.now () in
-  enumerate true rt bound (fun i _ _ _ ->
-      if not (prune i) then
-        let dt = Time.Span.to_sec @@ Time.diff (Time.now ()) start_time in
-        Hashtbl.set hits ~key:(insert_expression dagger i) ~data:dt
-      else incr number_pruned);
-  (Hashtbl.to_alist hits, !number_pruned)
+  let hits = Int.Table.create ()
+  and start_time = Time.now () in
+  enumerate tp_req true bound (fun e _ _ _ ->
+    let dt = Time.Span.to_sec @@ Time.diff (Time.now ()) start_time in
+    Hashtbl.set hits ~key:(insert_expression dagger e) ~data:dt);
+  Hashtbl.to_alist hits
 
 (* iterative deepening version of enumerate_bounded *)
-let enumerate_ID ?prune:(prune = do_not_prune) dagger library t frontier_size =
+let enumerate_ID
+  (dagger : expressionGraph)
+  (library : library)
+  (tp_req : tp)
+  (frontier_size : int)
+  : (int(*graph index for matching expression*)*float(*time to enumerate*)) list =
   let rec iterate bound =
-    let (indices, number_pruned) = enumerate_bounded ~prune dagger library t bound in
-    if List.length indices + number_pruned < frontier_size
+    let indices = enumerate_bounded dagger library tp_req bound in
+    if List.length indices < frontier_size
     then iterate (bound+.0.5)
     else indices
   in iterate (1.5 *. log (Float.of_int frontier_size))
 
-let enumerate_frontiers_for_tasks grammar frontier_size tasks
+let enumerate_frontiers_for_tasks
+  (grammar : library)
+  (frontier_size : int)
+  (tasks : task list)
   : (tp*(int*float) list) list*expressionGraph = (* this only enumerates normal tasks *)
   let normal_tasks = List.filter tasks ~f:(fun t -> is_none @@ t.proposal) in
   let types = remove_duplicates (List.map tasks ~f:(fun t -> t.task_type)) in

@@ -1,6 +1,6 @@
 C = corebuild
 
-src := $(wildcard ./*.ml)
+src := $(wildcard src/**/*.ml)
 variants = str list
 mini = src/mini.native
 

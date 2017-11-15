@@ -141,11 +141,12 @@ let canonical_type t =
     | TCon(k,a) -> TCon(k,List.map ~f:canon a)
   in canon t
 
-let rec next_type_variable t =
+let rec next_type_variable_id t =
   match t with
   | TID(i) -> i+1
   | TCon(_,[]) -> 0
-  | TCon(_,is) -> List.fold_left ~f:max ~init:0 (List.map is ~f:next_type_variable)
+  | TCon(_,is) -> List.fold_left ~f:max ~init:0 (List.map is ~f:next_type_variable_id)
+let new_type_variable t = TID(next_type_variable_id t)
 
 (* tries to instantiate a universally quantified type with a given request *)
 let instantiated_type universal_type requested_type =
@@ -174,7 +175,7 @@ let argument_request request left =
   | _ -> raise (Failure ("invalid function type: "^(string_of_type left)))
 
 let function_request request =
-  canonical_type (make_arrow (TID(next_type_variable request)) request)
+  canonical_type (make_arrow (new_type_variable request) request)
 
 let rec get_arity = function
   | TCon(a,[_;r]) when a = "->" -> 1+get_arity r
