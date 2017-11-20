@@ -1,0 +1,5 @@
+S src
+S src/ec
+B _build/*
+PKG core
+PKG yojson
