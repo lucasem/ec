@@ -3,9 +3,11 @@ from setuptools import setup, find_packages
 import os
 
 # build ec
-os.system('make -C ..')
-os.system('cp ../str ./ec_str')
-os.system('cp ../list ./ec_list')
+_ROOT = os.path.abspath(os.path.dirname(__file__))
+rel = lambda path: os.path.join(_ROOT, path)
+os.system(f"make -C {rel('..')}")
+os.system(f"cp {rel('../str')} {rel('ec_str')}")
+os.system(f"cp {rel('../list')} {rel('ec_list')}")
 
 # build package
 setup(
