@@ -12,9 +12,10 @@ def list_functions():
     ec_path = os.path.join(_ROOT, 'ec_list')
 
 class Task:
-    def __init__(self, name, examples):
+    def __init__(self, name, tp, examples):
         """
         :param name: string
+        :param tp: string denoting the type for a task solution
         :param examples: list of IO duples
         """
         self.name = name

@@ -18,6 +18,29 @@ let command main =
     )
     main
 
+let deserialize_type (s : string) : T.t =
+  let type_of_string = function
+    | "string" -> T.s
+    | "list-of-string" -> T.l T.s
+    | "char" -> T.c
+    | "list-of-char" -> T.l T.c
+    | "int" -> T.i
+    | "list-of-int" -> T.l T.i
+    | "bool" -> T.b
+    | "list-of-bool" -> T.l T.b
+    | _ -> raise (Failure "unknown type")
+  in
+  let strs = Re2.Regex.split (Re2.Regex.create_exn "->") s in
+  match strs with
+  | [] -> raise (Failure "invalid type")
+  | [s] -> type_of_string @@ String.trim s
+  | _ ->
+      let types = List.rev @@ List.map ~f:(fun s -> type_of_string @@ String.trim s) strs in
+      let t_last = List.hd_exn types
+      and t_second_last = List.nth_exn types 1
+      and t_rest = List.drop types 2 in
+      List.fold ~init:(T.arrow t_second_last t_last) ~f:T.arrow t_rest
+
 let json_of_ec_results grammar progs hit_rate =
   let open Yojson.Basic in
   let json_grammar = `List (List.map grammar ~f:(fun (e,l) ->
@@ -37,12 +60,14 @@ let json_of_ec_results grammar progs hit_rate =
     ("hit_rate", `Int hit_rate);
   ]
 
-let load_json prim_combs tp deserialize_problem file =
+let load_json prim_combs deserialize_problem file =
   let open Yojson.Basic.Util in
   let deserialize_problems json_ps = List.map json_ps ~f:deserialize_problem in
   let deserialize_task variant json_t =
-    task_of_problems ~t:tp ~name:(json_t |> member "name" |> to_string)
-    @@ deserialize_problems (json_t |> member variant |> to_list) in
+    let tp = deserialize_type (json_t |> member "type" |> to_string)
+    and name = json_t |> member "name" |> to_string
+    and problems = deserialize_problems (json_t |> member variant |> to_list)
+    in task_of_problems ~tp ~name problems in
   let deserialize_comb json_c = Expr.unmarshal (json_c |> member "expr" |> to_string) prim_combs in
   let json = match file with
   | "-" -> Yojson.Basic.from_channel stdin
@@ -55,9 +80,9 @@ let load_json prim_combs tp deserialize_problem file =
   let combs = List.dedup (prim_combs @ combs) in
   tasks, combs
 
-let execute prim_combs tp deserialize_problem =
+let execute prim_combs deserialize_problem =
   let main it lambda smoothing frontier_size file () =
-    let tasks, combs = load_json prim_combs tp deserialize_problem file in
+    let tasks, combs = load_json prim_combs deserialize_problem file in
     let grammar, progs =
       ec combs tasks it ~lambda ~smoothing ~frontier_size in
     let hit_rate =

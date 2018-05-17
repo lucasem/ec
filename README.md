@@ -4,7 +4,7 @@ Clone the repo and make sure you have the correct setup:
 ```
 opam switch 4.06.0
 eval `opam config env`
-opam install core.v0.9.2 yojson
+opam install core.v0.9.2 re2.v0.9.1 yojson
 ```
 
 # Build
@@ -44,10 +44,10 @@ These flags may be used as follows:
 The input json must possess `grammar` and `tasks` fields which are lists.
 Each item in the `grammar` list is an object with a single field, `expr`,
 that points to a string representing a combinator. Each item in the `tasks`
-list is an object with three fields: a unique `name`, and `examples`
-which points to an array of problems which must be satisfied by the same
-learned program. These problems are objects with two fields, `i` and `o`
-corresponding to input and output for the program. Here's a simple
+list is an object with three fields: a unique `name`, a `type`, and
+`examples` which points to an array of problems which must be satisfied by
+the same learned program. These problems are objects with two fields, `i`
+and `o` corresponding to input and output for the program. Here's a simple
 example:
 ```json
 { "grammar": [
@@ -55,6 +55,7 @@ example:
     { "expr":"((B cap) lower)" } ],
   "tasks": [
     { "name": "append s",
+      "type": "string -> string",
       "examples": [
         { "i":"test", "o":"tests" },
         { "i":"tree", "o":"trees" },
@@ -117,11 +118,6 @@ of the EC algorithm.  Here's a simple example:
 }
 ```
 
-### Mini
-
-A convience build `make mini`, corresponding to [`./mini.ml`](./mini.ml),
-helps to quickly test and use expressions.
-
 # Usage (python)
 
 To install the python package, you must be using python 3.
@@ -141,13 +137,13 @@ ec.string_transformations()
 #ec.list_functions()
 
 tasks = [
-    ec.Task("IaN -> Ian", [
-        ("IaN", "Ian"),
-        ("MELVIN", "Melvin"),
-    ]),
-    ec.Task("upper first", [
+    ec.Task("upper first", "string -> string", [
         ("some input", "SOME input"),
         ("yet another example", "YET another example")
+    ]),
+    ec.Task("IaN to Ian", "string -> string", [
+        ("IaN", "Ian"),
+        ("MELVIN", "Melvin"),
     ]),
 ]
 
@@ -169,7 +165,19 @@ for t in output["programs"]:
     print(f"task {name} solution: {expr}")
 
 """stdout:
-task IaN -> Ian solution: ((B cap) lower)
+task IaN to Ian solution: ((B cap) lower)
 task upper first solution: ((fnth upper) 0)
 """
 ```
+
+# Misc
+
+### Types
+
+Supplied types are delimited by `->` and can be `int`, `bool`, `char`,
+`string`, or those primitive types prefixed with `list-of-`.
+
+### Mini
+
+A convience build `make mini`, corresponding to [`./mini.ml`](./mini.ml),
+helps to quickly test and use expressions.

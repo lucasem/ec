@@ -115,11 +115,11 @@ let ec
   and progs = get_some !p in
   grammar, progs
 
-type problem = { i: Expr.e; o: unit ref }
+type problem = { i: Expr.e list; o: unit ref }
 
-let task_of_problems problems ~t ~name =
+let task_of_problems problems ~tp ~name =
   let single_score_func e p logl =
-    let q = Expr.Application(e, p.i) in
+    let q = List.fold ~init:e ~f:(fun acc e -> Expr.Application(acc, e)) p.i in
     match Expr.run q with
     | Some(r) when r = (!(Obj.magic p.o)) -> logl
     | _ -> Core.Float.neg_infinity
@@ -133,7 +133,7 @@ let task_of_problems problems ~t ~name =
   ) in
   Task.{
     name = name;
-    task_type = t;
+    task_type = tp;
     score = LogLikelihood(score_func);
     proposal = None;
   }

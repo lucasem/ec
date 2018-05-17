@@ -12,7 +12,7 @@ ec: str
 	ln -s str ec
 
 $(variants): $(src)
-	$(C) -pkg yojson -I src/ec -quiet src/main_$@.native
+	$(C) -pkg yojson -pkg re2 -I src/ec -quiet src/main_$@.native
 	cp `readlink main_$@.native` $@
 	$(RM) main_$@.native
 

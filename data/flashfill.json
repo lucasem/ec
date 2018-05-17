@@ -3,12 +3,14 @@
     { "expr":"((B +1) (findchar <LESS-THAN>))" } ],
   "tasks": [
     { "name":"upper first",
+      "type": "string -> string",
       "examples": [
         { "i":"test two", "o":"TEST two" },
         { "i":"test", "o":"TEST" },
         { "i":"tests", "o":"TESTS" },
         { "i":"yet another test", "o":"YET another test" } ] },
     { "name":"cap last",
+      "type": "string -> string",
       "examples": [
         { "i":"test two", "o":"test Two" },
         { "i":"test", "o":"Test" },
@@ -16,6 +18,7 @@
         { "i":"yet another test", "o":"yet another Test" },
         { "i":"yet another test", "o":"yet another Test" } ] },
   { "name":"My name is Richard -> Richard",
+    "type": "string -> string",
     "examples": [
       { "i":"My name is Richard", "o":"Richard" },
       { "i":"My name is John", "o":"John" },
@@ -23,6 +26,7 @@
       { "i":"My name is Bill", "o":"Bill" },
       { "i":"My name is Albert", "o":"Albert" } ] },
   { "name":"thomas -> Thomas",
+    "type": "string -> string",
     "examples": [
       { "i":"thomas", "o":"Thomas" },
       { "i":"james", "o":"James" },
@@ -30,6 +34,7 @@
       { "i":"charles", "o":"Charles" },
       { "i":"paul", "o":"Paul" } ] },
   { "name":"Arthur Joe Juan -> A.J.J.",
+    "type": "string -> string",
     "examples": [
       { "i":"Arthur Joe Juan", "o":"A.J.J." },
       { "i":"Donald Steven George", "o":"D.S.G." },
@@ -37,6 +42,7 @@
       { "i":"Jose Larry Scott", "o":"J.L.S." },
       { "i":"Raymond Frank Timothy", "o":"R.F.T." } ] },
   { "name":"ruby.clinton@mit.edu -> Ruby Clinton",
+    "type": "string -> string",
     "examples": [
       { "i":"ruby.clinton@mit.edu", "o":"Ruby Clinton" },
       { "i":"josh.smith@gmail.com", "o":"Josh Smith" },
@@ -44,6 +50,7 @@
       { "i":"brent.harold@hotmail.com", "o":"Brent Harold" },
       { "i":"jim.james@fas.harvard.edu", "o":"Jim James" } ] },
   { "name":"CHORE BOY HD SC SPNG 1PK -> 1PK",
+    "type": "string -> string",
     "examples": [
       { "i":"CHORE BOY HD SC SPNG 1PK", "o":"1PK" },
       { "i":"BTR KRNL WK CORN 15Z", "o":"15Z" },
@@ -51,6 +58,7 @@
       { "i":"O F TOMATO PASTE 6OZ", "o":"6OZ" },
       { "i":"FRENCH WORCESTERSHIRE 5Z", "o":"5Z" } ] },
   { "name":"Principals Of Programming Languages -> POPL",
+    "type": "string -> string",
     "examples": [
       { "i":"Principals Of Programming Languages", "o":"POPL" },
       { "i":"Neural Information Processing Systems", "o":"NIPS" },
@@ -58,6 +66,7 @@
       { "i":"International Conference on Functional Programming", "o":"ICFP" },
       { "i":"International Business Machines", "o":"IBM" } ] },
   { "name":"5/5/1987 -> 87",
+    "type": "string -> string",
     "examples": [
       { "i":"5/5/1987", "o":"87" },
       { "i":"1/21/2001", "o":"01" },
@@ -65,6 +74,7 @@
       { "i":"22.02.2002", "o":"02" },
       { "i":"2003-23-03", "o":"03" } ] },
   { "name":"12012011 -> 12/01/2011",
+    "type": "string -> string",
     "examples": [
       { "i":"12012011", "o":"12/01/2011" },
       { "i":"11152011", "o":"11/15/2011" },
@@ -72,6 +82,7 @@
       { "i":"01252010", "o":"01/25/2010" },
       { "i":"01112011", "o":"01/11/2011" } ] },
   { "name":"6/23/15 -> 6.23.2015",
+    "type": "string -> string",
     "examples": [
       { "i":"6/23/15", "o":"6.23.2015" },
       { "i":"4/12/2023", "o":"4.12.2023" },
@@ -79,6 +90,7 @@
       { "i":"12/32/2013", "o":"12.32.2013" },
       { "i":"7/15/2015", "o":"7.15.2015" } ] },
   { "name":"IaN RoDny -> Ian Rodny",
+    "type": "string -> string",
     "examples": [
       { "i":"IaN RoDny", "o":"Ian Rodny" },
       { "i":"MELVIN Julian", "o":"Melvin Julian" },
@@ -86,6 +98,7 @@
       { "i":"StaNleY TRAVis", "o":"Stanley Travis" },
       { "i":"mary gelman", "o":"Mary Gelman" } ] },
   { "name":"herbert is <2: Marion> morris -> (2 marion)",
+    "type": "string -> string",
     "examples": [
       { "i":"herbert is <2: Marion> morris", "o":"(2 marion)" },
       { "i":"country music <9: refrigerator>", "o":"(9 refrigerator)" },
@@ -93,6 +106,7 @@
       { "i":"Don Kyle <3: ricky sergio> virgil", "o":"(3 ricky)" },
       { "i":"francisco eduardo <1: apples>", "o":"(1 apple trees)" } ] },
   { "name":"3 Ames St. Portland OR 02142 -> Portland",
+    "type": "string -> string",
     "examples": [
       { "i":"3 Ames St. Portland OR 02142", "o":"Portland" },
       { "i":"47 Foskett St. #2 Cambridge MA 02144", "o":"Cambridge" },
@@ -100,6 +114,7 @@
       { "i":"3113 Greenfield Ave. Los Angeles CA 90034", "o":"Los Angeles" },
       { "i":"43 St. Margaret St. #1 Dorchester MA 02145", "o":"Dorchester" } ] },
   { "name":"Marin Lorentzen -> M.L.",
+    "type": "string -> string",
     "examples": [
       { "i":"Marin Lorentzen", "o":"M.L." },
       { "i":"Annita Nicely", "o":"A.N." },
@@ -107,6 +122,7 @@
       { "i":"Oma Cornelison", "o":"O.C." },
       { "i":"Verlene Ottley", "o":"V.O." } ] },
   { "name":"#include <os.h> -> OS",
+    "type": "string -> string",
     "examples": [
       { "i":"#include <os.h>", "o":"OS" },
       { "i":"#include <malloc.h>", "o":"MALLOC" },
@@ -114,6 +130,7 @@
       { "i":"#include <sys.h>", "o":"SYS" },
       { "i":"#include <stdio.h>", "o":"STDIO" } ] },
   { "name":"August 12 1993 -> August",
+    "type": "string -> string",
     "examples": [
       { "i":"August 12 1993", "o":"August" },
       { "i":"January 8", "o":"January" },
@@ -121,6 +138,7 @@
       { "i":"2007 (September)", "o":"September" },
       { "i":"July 4 2015", "o":"July" } ] },
   { "name":"47 Foskett St. #2 Cambridge MA 02144 -> Foskett",
+    "type": "string -> string",
     "examples": [
       { "i":"47 Foskett St. #2 Cambridge MA 02144", "o":"Foskett" },
       { "i":"43 Vassar St. 46-4053 Cambridge MA 02139", "o":"Vassar" },
@@ -128,6 +146,7 @@
       { "i":"3113 Greenfield Ave. Los Angeles CA 90034", "o":"Greenfield" },
       { "i":"3 Ames St. Portland OR 02142", "o":"Ames" } ] },
   { "name":"3113 Greenfield Ave. Los Angeles CA 90034 -> 3113",
+    "type": "string -> string",
     "examples": [
       { "i":"3113 Greenfield Ave. Los Angeles CA 90034", "o":"3113" },
       { "i":"47 Foskett St. #2 Cambridge MA 02144", "o":"47" },
@@ -135,6 +154,7 @@
       { "i":"43 Vassar St. 46-4053 Cambridge MA 02139", "o":"43" },
       { "i":"43 St. Margaret St. #1 Dorchester MA 02145", "o":"43" } ] },
   { "name":"3113 Greenfield Ave. Los Angeles CA 90034 -> CA",
+    "type": "string -> string",
     "examples": [
       { "i":"3113 Greenfield Ave. Los Angeles CA 90034", "o":"CA" },
       { "i":"43 St. Margaret St. #1 Dorchester MA 02145", "o":"MA" },
@@ -142,6 +162,7 @@
       { "i":"47 Foskett St. #2 Cambridge MA 02144", "o":"MA" },
       { "i":"43 Vassar St. 46-4053 Cambridge MA 02139", "o":"MA" } ] },
   { "name":"IaN -> Ian",
+    "type": "string -> string",
     "examples": [
       { "i":"IaN", "o":"Ian" },
       { "i":"MELVIN", "o":"Melvin" },
@@ -149,12 +170,14 @@
       { "i":"StaNleY", "o":"Stanley" },
       { "i":"mary", "o":"Mary" } ] },
     { "name":"nospaces",
+      "type": "string -> string",
       "examples": [
         { "i":"no spaces", "o":"nospaces" },
         { "i":"no matter how many", "o":"nomatterhowmany" },
         { "i":"without", "o":"without"},
         { "i":"some spaces", "o":"somespaces" } ] },
     { "name":"first letters",
+      "type": "string -> string",
       "examples": [
         { "i":"Marin Lorentzen", "o":"M L" },
         { "i":"Annita Nicely", "o":"A N" },
@@ -162,6 +185,7 @@
         { "i":"Oma Cornelison", "o":"O C" },
         { "i":"Verlene Ottley", "o":"V O" } ] },
     { "name":"concat first letters",
+      "type": "string -> string",
       "examples": [
         { "i":"Marin Lorentzen", "o":"ML" },
         { "i":"Annita Nicely", "o":"AN" },
@@ -169,10 +193,12 @@
         { "i":"Oma Cornelison", "o":"OC" },
         { "i":"Verlene Ottley", "o":"VO" } ] },
     { "name":"filter cap",
+      "type": "string -> string",
       "examples": [
         { "i":"Words that start With Caps", "o":"Words With Caps" },
         { "i":"thIs One IS mORE meSsY", "o":"One IS" } ] },
     { "name":"SICP",
+      "type": "string -> string",
       "examples": [
         { "i":"Structure and Interpretation of Computer Programs", "o":"SICP" },
         { "i":"Principals Of Programming Languages", "o":"POPL" },
@@ -181,40 +207,48 @@
         { "i":"International Conference on Functional Programming", "o":"ICFP" },
         { "i":"International Business Machines", "o":"IBM" } ] },
     { "name":"ruby -> r",
+      "type": "string -> string",
       "examples": [
         { "i":"ruby", "o":"r" },
         { "i":"josh and stuff", "o":"j" },
         { "i":"just.the.first.letter", "o":"j" } ] },
     { "name":"find dot",
+      "type": "string -> string",
       "examples": [
         { "i":"where is.the dot", "o":"8" },
         { "i":"an.other dot", "o":"2" } ] },
     { "name":"find less-than",
+      "type": "string -> string",
       "examples": [
         { "i":"where is<the angle", "o":"8" },
         { "i":"an<other angle", "o":"2" } ] },
     { "name":"discard after dot",
+      "type": "string -> string",
       "examples": [
         { "i":"discard after.dot", "o":"discard after" },
         { "i":"os.h", "o":"os" },
         { "i":"string.h", "o":"string" },
         { "i":"many words.before dot", "o":"many words" } ] },
     { "name":"drop first two chars",
+      "type": "string -> string",
       "examples": [
         { "i":"drop first two chars", "o":"op first two chars" },
         { "i":"tail", "o":"il" } ] },
     { "name":"discard before less-than",
+      "type": "string -> string",
       "examples": [
         { "i":"before angle<discard", "o":"discard" } ,
         { "i":"one two three <four", "o":"four" },
         { "i":"one<two three four", "o":"two three four" } ] },
     { "name":"discard after greater-than",
+      "type": "string -> string",
       "examples": [
         { "i":"discard>after angle", "o":"discard" },
         { "i":"one two> three four", "o":"one two" },
         { "i":"one two three>four", "o":"one two three" },
         { "i":"one>two three four", "o":"one" } ] },
     { "name":"#include<os.h> -> os.h",
+      "type": "string -> string",
       "examples": [
         { "i":"#include <os.h>", "o":"os.h" },
         { "i":"#include <malloc.h>", "o":"malloc.h" },
@@ -222,6 +256,7 @@
         { "i":"#include<sys.h>", "o":"sys.h" },
         { "i":"#include<stdio.h>", "o":"stdio.h" } ] },
     { "name":"#include<os.h> -> os",
+      "type": "string -> string",
       "examples": [
         { "i":"#include <os.h>", "o":"os" },
         { "i":"#include <malloc.h>", "o":"malloc" },
@@ -229,6 +264,7 @@
         { "i":"#include<sys.h>", "o":"sys" },
         { "i":"#include<stdio.h>", "o":"stdio" } ] },
     { "name":"#include<os.h> -> OS",
+      "type": "string -> string",
       "examples": [
         { "i":"#include <os.h>", "o":"OS" },
         { "i":"#include <malloc.h>", "o":"MALLOC" },
@@ -236,41 +272,50 @@
         { "i":"#include<sys.h>", "o":"SYS" },
         { "i":"#include<stdio.h>", "o":"STDIO" } ] },
   { "name":"ruby -> r",
+    "type": "string -> string",
     "examples": [
       { "i":"ruby", "o":"r" },
       { "i":"josh and stuff", "o":"j" },
       { "i":"always the first letter", "o":"a" } ] },
   { "name":"find dot",
+    "type": "string -> string",
     "examples": [
       { "i":"where is.the dot", "o":"8" },
       { "i":"an.other dot", "o":"2" } ] },
   { "name":"discard after @",
+    "type": "string -> string",
     "examples": [
       { "i":"discard@after at", "o":"discard" },
       { "i":"one two@three four", "o":"one two" } ] },
   { "name":"discard after dot",
+    "type": "string -> string",
     "examples": [
       { "i":"discard.after dot", "o":"discard" },
       { "i":"one two.three four", "o":"one two" } ] },
   { "name":"dots to spaces",
+    "type": "string -> string",
     "examples": [
       { "i":"ruby.clinton", "o":"ruby clinton" },
       { "i":"matthew.jack.rosman", "o":"matthew jack rosman" },
       { "i":"brent.harold", "o":"brent harold" },
       { "i":"one.two.three.four", "o":"one two three four" } ] },
   { "name":"nospaces",
+    "type": "string -> string",
     "examples": [
       { "i":"no matter how many", "o":"nomatterhowmany" },
       { "i":"no spaces", "o":"nospaces" } ] },
   { "name":"feach cap",
+    "type": "string -> string",
     "examples": [
       { "i":"ruby clinton", "o":"Ruby Clinton" },
       { "i":"matthew jack rosman", "o":"Matthew Jack Rosman" } ] },
   { "name":"ruby.clinton -> Ruby Clinton",
+    "type": "string -> string",
     "examples": [
       { "i":"ruby.clinton", "o":"Ruby Clinton" },
       { "i":"matthew.jack.rosman", "o":"Matthew Jack Rosman" } ] },
  { "name":"ruby.clinton@mit.edu -> Ruby Clinton",
+   "type": "string -> string",
    "examples": [
      { "i":"ruby.clinton@mit.edu", "o":"Ruby Clinton" },
      { "i":"matthew.jack.rosman@yahoo.com", "o":"Matthew Jack Rosman" },
