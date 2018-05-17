@@ -44,19 +44,19 @@ These flags may be used as follows:
 The input json must possess `grammar` and `tasks` fields which are lists.
 Each item in the `grammar` list is an object with a single field, `expr`,
 that points to a string representing a combinator. Each item in the `tasks`
-list is an object with three fields: a unique `name`, and `test` and `train`
-which point to arrays of problems which must be satisfied by the same
+list is an object with three fields: a unique `name`, and `examples`
+which points to an array of problems which must be satisfied by the same
 learned program. These problems are objects with two fields, `i` and `o`
-corresponding to input and output for the program. Here's a simple example:
+corresponding to input and output for the program. Here's a simple
+example:
 ```json
 { "grammar": [
     { "expr":"(C nth)" },
     { "expr":"((B cap) lower)" } ],
   "tasks": [
     { "name": "append s",
-      "train": [
-        { "i":"test", "o":"tests" } ],
-      "test": [
+      "examples": [
+        { "i":"test", "o":"tests" },
         { "i":"tree", "o":"trees" },
         { "i":"chair", "o":"chairs" } ] }
   ]
@@ -71,13 +71,13 @@ string representation of a combinator and its associated log-likelihood
 according to the given task set. Each item in the `programs` list is an
 object with two fields, `task` (string) and `result` (null/obj),
 corresponding to the task name and its results. `result` is null if the task
-failed in either the train or both train and test problem sets, or (on
-success) an object with `log_probability` (float), `expr` (string), and `time`
-(float) fields, where `expr` is the string representation of the combinator
-that solved the task and `log_probability` is its associated
-log-probability, and `time` is how long, in seconds, it took to enumerate
-the solution in the last iteration of the EC algorithm.
-Here's a simple example:
+failed, or (on success) an object with `log_probability` (float), `expr`
+(string), and `time` (float) fields, where `expr` is the string
+representation of the combinator that solved the task and
+`log_probability` is its associated log-probability, and `time` is how
+long, in seconds, it took to enumerate the solution in the last iteration
+of the EC algorithm.  Here's a simple example:
+
 ```json
 {
   "grammar": [
@@ -147,7 +147,6 @@ tasks = [
     ]),
     ec.Task("upper first", [
         ("some input", "SOME input"),
-    ], test=[ # optional test examples
         ("yet another example", "YET another example")
     ]),
 ]

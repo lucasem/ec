@@ -12,19 +12,17 @@ def list_functions():
     ec_path = os.path.join(_ROOT, 'ec_list')
 
 class Task:
-    def __init__(self, name, train, test=[]):
+    def __init__(self, name, examples):
         """
         :param name: string
-        :param train: list of IO duples
-        :param test: list of IO duples
+        :param examples: list of IO duples
         """
         self.name = name
-        self.train = train
-        self.test = test
+        self.examples = examples
     def objectify(self):
+        examples = list(map(lambda t:{"i":t[0],"o":t[1]}, self.examples))
         return {"name": self.name,
-                "test": list(map(lambda t:{"i":t[0],"o":t[1]}, self.test)),
-                "train": list(map(lambda t:{"i":t[0],"o":t[1]}, self.train))}
+                "examples": examples }
 
 def run(tasks, frontier_size=5000, it=5, lambd=1.5, smoothing=1.0):
     """

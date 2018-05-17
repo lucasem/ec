@@ -18,24 +18,6 @@ let command main =
     )
     main
 
-let verify progs (test : Task.t List.t) =
-  List.map progs ~f:(fun prog ->
-    let (name, res) = prog in
-    match res with
-    | None -> prog
-    | Some((_, _, e, _)) ->
-        let task = List.find test ~f:(fun t->t.name=name) in
-        match task with
-        | None -> prog
-        | Some(task) ->
-            match task.score with
-            | Seed(_) -> prog
-            | LogLikelihood(ll) ->
-                if Utils.is_valid (ll e)
-                then prog
-                else (name, None)
-  )
-
 let json_of_ec_results grammar progs hit_rate =
   let open Yojson.Basic in
   let json_grammar = `List (List.map grammar ~f:(fun (e,l) ->
@@ -68,18 +50,16 @@ let load_json prim_combs tp deserialize_problem file =
   in
   let json_tasks  = json |> member "tasks" |> to_list
   and json_combs = json |> member "grammar" |> to_list in
-  let train = List.map json_tasks ~f:(deserialize_task "train")
-  and test  = List.map json_tasks ~f:(deserialize_task "test")
+  let tasks = List.map json_tasks ~f:(deserialize_task "examples")
   and combs = List.map json_combs ~f:deserialize_comb in
   let combs = List.dedup (prim_combs @ combs) in
-  train, test, combs
+  tasks, combs
 
 let execute prim_combs tp deserialize_problem =
   let main it lambda smoothing frontier_size file () =
-    let train, test, combs = load_json prim_combs tp deserialize_problem file in
+    let tasks, combs = load_json prim_combs tp deserialize_problem file in
     let grammar, progs =
-      ec combs train it ~lambda ~smoothing ~frontier_size in
-    let progs = verify progs test in
+      ec combs tasks it ~lambda ~smoothing ~frontier_size in
     let hit_rate =
       List.fold_left ~f:(+) ~init:0 @@ List.map progs
         ~f:(fun (_, res) -> match res with

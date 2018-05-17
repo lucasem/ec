@@ -3,321 +3,276 @@
     { "expr":"((B +1) (findchar <LESS-THAN>))" } ],
   "tasks": [
     { "name":"upper first",
-      "train": [
-        { "i":"test two", "o":"TEST two" } ],
-      "test": [
+      "examples": [
+        { "i":"test two", "o":"TEST two" },
         { "i":"test", "o":"TEST" },
         { "i":"tests", "o":"TESTS" },
         { "i":"yet another test", "o":"YET another test" } ] },
     { "name":"cap last",
-      "train": [
-        { "i":"test two", "o":"test Two" } ],
-      "test": [
+      "examples": [
+        { "i":"test two", "o":"test Two" },
         { "i":"test", "o":"Test" },
         { "i":"tests", "o":"Tests" },
         { "i":"yet another test", "o":"yet another Test" },
         { "i":"yet another test", "o":"yet another Test" } ] },
   { "name":"My name is Richard -> Richard",
-    "train": [
-      { "i":"My name is Richard", "o":"Richard" } ],
-    "test": [
+    "examples": [
+      { "i":"My name is Richard", "o":"Richard" },
       { "i":"My name is John", "o":"John" },
       { "i":"My name is Josh", "o":"Josh" },
       { "i":"My name is Bill", "o":"Bill" },
       { "i":"My name is Albert", "o":"Albert" } ] },
   { "name":"thomas -> Thomas",
-    "train": [
-      { "i":"thomas", "o":"Thomas" } ],
-    "test": [
+    "examples": [
+      { "i":"thomas", "o":"Thomas" },
       { "i":"james", "o":"James" },
       { "i":"chris", "o":"Chris" },
       { "i":"charles", "o":"Charles" },
       { "i":"paul", "o":"Paul" } ] },
   { "name":"Arthur Joe Juan -> A.J.J.",
-    "train": [
-      { "i":"Arthur Joe Juan", "o":"A.J.J." } ],
-    "test": [
+    "examples": [
+      { "i":"Arthur Joe Juan", "o":"A.J.J." },
       { "i":"Donald Steven George", "o":"D.S.G." },
       { "i":"Kevin Jason Matthew", "o":"K.J.M." },
       { "i":"Jose Larry Scott", "o":"J.L.S." },
       { "i":"Raymond Frank Timothy", "o":"R.F.T." } ] },
   { "name":"ruby.clinton@mit.edu -> Ruby Clinton",
-    "train": [
-      { "i":"ruby.clinton@mit.edu", "o":"Ruby Clinton" } ],
-    "test": [
+    "examples": [
+      { "i":"ruby.clinton@mit.edu", "o":"Ruby Clinton" },
       { "i":"josh.smith@gmail.com", "o":"Josh Smith" },
       { "i":"matthew.rosman@yahoo.com", "o":"Matthew Rosman" },
       { "i":"brent.harold@hotmail.com", "o":"Brent Harold" },
       { "i":"jim.james@fas.harvard.edu", "o":"Jim James" } ] },
   { "name":"CHORE BOY HD SC SPNG 1PK -> 1PK",
-    "train": [
-      { "i":"CHORE BOY HD SC SPNG 1PK", "o":"1PK" } ],
-    "test": [
+    "examples": [
+      { "i":"CHORE BOY HD SC SPNG 1PK", "o":"1PK" },
       { "i":"BTR KRNL WK CORN 15Z", "o":"15Z" },
       { "i":"CAMP DRY DBL NDL 3.6OZ", "o":"3.6OZ" },
       { "i":"O F TOMATO PASTE 6OZ", "o":"6OZ" },
       { "i":"FRENCH WORCESTERSHIRE 5Z", "o":"5Z" } ] },
   { "name":"Principals Of Programming Languages -> POPL",
-    "train": [
-      { "i":"Principals Of Programming Languages", "o":"POPL" } ],
-    "test": [
+    "examples": [
+      { "i":"Principals Of Programming Languages", "o":"POPL" },
       { "i":"Neural Information Processing Systems", "o":"NIPS" },
       { "i":"International Conferences on Software Engineering", "o":"ICSE" },
       { "i":"International Conference on Functional Programming", "o":"ICFP" },
       { "i":"International Business Machines", "o":"IBM" } ] },
   { "name":"5/5/1987 -> 87",
-    "train": [
-      { "i":"5/5/1987", "o":"87" } ],
-    "test": [
+    "examples": [
+      { "i":"5/5/1987", "o":"87" },
       { "i":"1/21/2001", "o":"01" },
       { "i":"21/1/2001", "o":"01" },
       { "i":"22.02.2002", "o":"02" },
       { "i":"2003-23-03", "o":"03" } ] },
   { "name":"12012011 -> 12/01/2011",
-    "train": [
-      { "i":"12012011", "o":"12/01/2011" } ],
-    "test": [
+    "examples": [
+      { "i":"12012011", "o":"12/01/2011" },
       { "i":"11152011", "o":"11/15/2011" },
       { "i":"06222005", "o":"06/22/2005" },
       { "i":"01252010", "o":"01/25/2010" },
       { "i":"01112011", "o":"01/11/2011" } ] },
   { "name":"6/23/15 -> 6.23.2015",
-    "train": [
-      { "i":"6/23/15", "o":"6.23.2015" } ],
-    "test": [
+    "examples": [
+      { "i":"6/23/15", "o":"6.23.2015" },
       { "i":"4/12/2023", "o":"4.12.2023" },
       { "i":"1/23/2009", "o":"1.23.2009" },
       { "i":"12/32/2013", "o":"12.32.2013" },
       { "i":"7/15/2015", "o":"7.15.2015" } ] },
   { "name":"IaN RoDny -> Ian Rodny",
-    "train": [
-      { "i":"IaN RoDny", "o":"Ian Rodny" } ],
-    "test": [
+    "examples": [
+      { "i":"IaN RoDny", "o":"Ian Rodny" },
       { "i":"MELVIN Julian", "o":"Melvin Julian" },
       { "i":"miKe dwIGHT", "o":"Mike Dwight" },
       { "i":"StaNleY TRAVis", "o":"Stanley Travis" },
       { "i":"mary gelman", "o":"Mary Gelman" } ] },
   { "name":"herbert is <2: Marion> morris -> (2 marion)",
-    "train": [
-      { "i":"herbert is <2: Marion> morris", "o":"(2 marion)" } ],
-    "test": [
+    "examples": [
+      { "i":"herbert is <2: Marion> morris", "o":"(2 marion)" },
       { "i":"country music <9: refrigerator>", "o":"(9 refrigerator)" },
       { "i":"Three <2: vincent> Jeff", "o":"(2 vincent)" },
       { "i":"Don Kyle <3: ricky sergio> virgil", "o":"(3 ricky)" },
       { "i":"francisco eduardo <1: apples>", "o":"(1 apple trees)" } ] },
   { "name":"3 Ames St. Portland OR 02142 -> Portland",
-    "train": [
-      { "i":"3 Ames St. Portland OR 02142", "o":"Portland" } ],
-    "test": [
+    "examples": [
+      { "i":"3 Ames St. Portland OR 02142", "o":"Portland" },
       { "i":"47 Foskett St. #2 Cambridge MA 02144", "o":"Cambridge" },
       { "i":"43 Vassar St. 46-4053 Cambridge MA 02139", "o":"Cambridge" },
       { "i":"3113 Greenfield Ave. Los Angeles CA 90034", "o":"Los Angeles" },
       { "i":"43 St. Margaret St. #1 Dorchester MA 02145", "o":"Dorchester" } ] },
   { "name":"Marin Lorentzen -> M.L.",
-    "train": [
-      { "i":"Marin Lorentzen", "o":"M.L." } ],
-    "test": [
+    "examples": [
+      { "i":"Marin Lorentzen", "o":"M.L." },
       { "i":"Annita Nicely", "o":"A.N." },
       { "i":"Joanie Faas", "o":"J.F." },
       { "i":"Oma Cornelison", "o":"O.C." },
       { "i":"Verlene Ottley", "o":"V.O." } ] },
   { "name":"#include <os.h> -> OS",
-    "train": [
-      { "i":"#include <os.h>", "o":"OS" } ],
-    "test": [
+    "examples": [
+      { "i":"#include <os.h>", "o":"OS" },
       { "i":"#include <malloc.h>", "o":"MALLOC" },
       { "i":"#include <stdlib.h>", "o":"STDLIB" },
       { "i":"#include <sys.h>", "o":"SYS" },
       { "i":"#include <stdio.h>", "o":"STDIO" } ] },
   { "name":"August 12 1993 -> August",
-    "train": [
-      { "i":"August 12 1993", "o":"August" } ],
-    "test": [
+    "examples": [
+      { "i":"August 12 1993", "o":"August" },
       { "i":"January 8", "o":"January" },
       { "i":"December 1990", "o":"December" },
       { "i":"2007 (September)", "o":"September" },
       { "i":"July 4 2015", "o":"July" } ] },
   { "name":"47 Foskett St. #2 Cambridge MA 02144 -> Foskett",
-    "train": [
-      { "i":"47 Foskett St. #2 Cambridge MA 02144", "o":"Foskett" } ],
-    "test": [
+    "examples": [
+      { "i":"47 Foskett St. #2 Cambridge MA 02144", "o":"Foskett" },
       { "i":"43 Vassar St. 46-4053 Cambridge MA 02139", "o":"Vassar" },
       { "i":"43 St. Margaret St. #1 Dorchester MA 02145", "o":"St. Margaret" },
       { "i":"3113 Greenfield Ave. Los Angeles CA 90034", "o":"Greenfield" },
       { "i":"3 Ames St. Portland OR 02142", "o":"Ames" } ] },
   { "name":"3113 Greenfield Ave. Los Angeles CA 90034 -> 3113",
-    "train": [
-      { "i":"3113 Greenfield Ave. Los Angeles CA 90034", "o":"3113" } ],
-    "test": [
+    "examples": [
+      { "i":"3113 Greenfield Ave. Los Angeles CA 90034", "o":"3113" },
       { "i":"47 Foskett St. #2 Cambridge MA 02144", "o":"47" },
       { "i":"3 Ames St. Portland OR 02142", "o":"3" },
       { "i":"43 Vassar St. 46-4053 Cambridge MA 02139", "o":"43" },
       { "i":"43 St. Margaret St. #1 Dorchester MA 02145", "o":"43" } ] },
   { "name":"3113 Greenfield Ave. Los Angeles CA 90034 -> CA",
-    "train": [
-      { "i":"3113 Greenfield Ave. Los Angeles CA 90034", "o":"CA" } ],
-    "test": [
+    "examples": [
+      { "i":"3113 Greenfield Ave. Los Angeles CA 90034", "o":"CA" },
       { "i":"43 St. Margaret St. #1 Dorchester MA 02145", "o":"MA" },
       { "i":"3 Ames St. Portland OR 02142", "o":"OR" },
       { "i":"47 Foskett St. #2 Cambridge MA 02144", "o":"MA" },
       { "i":"43 Vassar St. 46-4053 Cambridge MA 02139", "o":"MA" } ] },
   { "name":"IaN -> Ian",
-    "train": [
-      { "i":"IaN", "o":"Ian" } ],
-    "test": [
+    "examples": [
+      { "i":"IaN", "o":"Ian" },
       { "i":"MELVIN", "o":"Melvin" },
       { "i":"miKe", "o":"Mike" },
       { "i":"StaNleY", "o":"Stanley" },
       { "i":"mary", "o":"Mary" } ] },
     { "name":"nospaces",
-      "train": [
+      "examples": [
         { "i":"no spaces", "o":"nospaces" },
-        { "i":"no matter how many", "o":"nomatterhowmany" } ],
-      "test": [
+        { "i":"no matter how many", "o":"nomatterhowmany" },
         { "i":"without", "o":"without"},
         { "i":"some spaces", "o":"somespaces" } ] },
     { "name":"first letters",
-      "train": [
-        { "i":"Marin Lorentzen", "o":"M L" } ],
-      "test": [
+      "examples": [
+        { "i":"Marin Lorentzen", "o":"M L" },
         { "i":"Annita Nicely", "o":"A N" },
         { "i":"Joanie Faas", "o":"J F" },
         { "i":"Oma Cornelison", "o":"O C" },
         { "i":"Verlene Ottley", "o":"V O" } ] },
     { "name":"concat first letters",
-      "train": [
-        { "i":"Marin Lorentzen", "o":"ML" } ],
-      "test": [
+      "examples": [
+        { "i":"Marin Lorentzen", "o":"ML" },
         { "i":"Annita Nicely", "o":"AN" },
         { "i":"Joanie Faas", "o":"JF" },
         { "i":"Oma Cornelison", "o":"OC" },
         { "i":"Verlene Ottley", "o":"VO" } ] },
     { "name":"filter cap",
-      "train": [
-        { "i":"Words that start With Caps", "o":"Words With Caps" } ],
-      "test": [
+      "examples": [
+        { "i":"Words that start With Caps", "o":"Words With Caps" },
         { "i":"thIs One IS mORE meSsY", "o":"One IS" } ] },
     { "name":"SICP",
-      "train": [
-        { "i":"Structure and Interpretation of Computer Programs", "o":"SICP" } ],
-      "test": [
+      "examples": [
+        { "i":"Structure and Interpretation of Computer Programs", "o":"SICP" },
         { "i":"Principals Of Programming Languages", "o":"POPL" },
         { "i":"Neural Information Processing Systems", "o":"NIPS" },
         { "i":"International Conferences on Software Engineering", "o":"ICSE" },
         { "i":"International Conference on Functional Programming", "o":"ICFP" },
         { "i":"International Business Machines", "o":"IBM" } ] },
     { "name":"ruby -> r",
-      "train": [
+      "examples": [
         { "i":"ruby", "o":"r" },
-        { "i":"josh and stuff", "o":"j" } ],
-      "test": [
+        { "i":"josh and stuff", "o":"j" },
         { "i":"just.the.first.letter", "o":"j" } ] },
     { "name":"find dot",
-      "train": [
-        { "i":"where is.the dot", "o":"8" } ],
-      "test": [
+      "examples": [
+        { "i":"where is.the dot", "o":"8" },
         { "i":"an.other dot", "o":"2" } ] },
     { "name":"find less-than",
-      "train": [
-        { "i":"where is<the angle", "o":"8" } ],
-      "test": [
+      "examples": [
+        { "i":"where is<the angle", "o":"8" },
         { "i":"an<other angle", "o":"2" } ] },
     { "name":"discard after dot",
-      "train": [
+      "examples": [
         { "i":"discard after.dot", "o":"discard after" },
-        { "i":"os.h", "o":"os" } ],
-      "test": [
+        { "i":"os.h", "o":"os" },
         { "i":"string.h", "o":"string" },
         { "i":"many words.before dot", "o":"many words" } ] },
     { "name":"drop first two chars",
-      "train": [
-        { "i":"drop first two chars", "o":"op first two chars" } ],
-      "test":  [
+      "examples": [
+        { "i":"drop first two chars", "o":"op first two chars" },
         { "i":"tail", "o":"il" } ] },
     { "name":"discard before less-than",
-      "train": [
+      "examples": [
         { "i":"before angle<discard", "o":"discard" } ,
-        { "i":"one two three <four", "o":"four" } ],
-      "test": [
+        { "i":"one two three <four", "o":"four" },
         { "i":"one<two three four", "o":"two three four" } ] },
     { "name":"discard after greater-than",
-      "train": [
+      "examples": [
         { "i":"discard>after angle", "o":"discard" },
-        { "i":"one two> three four", "o":"one two" } ],
-      "test": [
+        { "i":"one two> three four", "o":"one two" },
         { "i":"one two three>four", "o":"one two three" },
         { "i":"one>two three four", "o":"one" } ] },
     { "name":"#include<os.h> -> os.h",
-      "train": [
+      "examples": [
         { "i":"#include <os.h>", "o":"os.h" },
-        { "i":"#include <malloc.h>", "o":"malloc.h" } ],
-      "test": [
+        { "i":"#include <malloc.h>", "o":"malloc.h" },
         { "i":"#include<stdlib.h>", "o":"stdlib.h" },
         { "i":"#include<sys.h>", "o":"sys.h" },
         { "i":"#include<stdio.h>", "o":"stdio.h" } ] },
     { "name":"#include<os.h> -> os",
-      "train": [
+      "examples": [
         { "i":"#include <os.h>", "o":"os" },
-        { "i":"#include <malloc.h>", "o":"malloc" } ],
-      "test": [
+        { "i":"#include <malloc.h>", "o":"malloc" },
         { "i":"#include<stdlib.h>", "o":"stdlib" },
         { "i":"#include<sys.h>", "o":"sys" },
         { "i":"#include<stdio.h>", "o":"stdio" } ] },
     { "name":"#include<os.h> -> OS",
-      "train": [
+      "examples": [
         { "i":"#include <os.h>", "o":"OS" },
-        { "i":"#include <malloc.h>", "o":"MALLOC" } ],
-      "test": [
+        { "i":"#include <malloc.h>", "o":"MALLOC" },
         { "i":"#include<stdlib.h>", "o":"STDLIB" },
         { "i":"#include<sys.h>", "o":"SYS" },
         { "i":"#include<stdio.h>", "o":"STDIO" } ] },
   { "name":"ruby -> r",
-    "train": [
+    "examples": [
       { "i":"ruby", "o":"r" },
-      { "i":"josh and stuff", "o":"j" } ],
-    "test": [
+      { "i":"josh and stuff", "o":"j" },
       { "i":"always the first letter", "o":"a" } ] },
   { "name":"find dot",
-    "train": [
-      { "i":"where is.the dot", "o":"8" } ],
-    "test": [
+    "examples": [
+      { "i":"where is.the dot", "o":"8" },
       { "i":"an.other dot", "o":"2" } ] },
   { "name":"discard after @",
-    "train": [
-      { "i":"discard@after at", "o":"discard" } ],
-    "test": [
+    "examples": [
+      { "i":"discard@after at", "o":"discard" },
       { "i":"one two@three four", "o":"one two" } ] },
   { "name":"discard after dot",
-    "train": [
-      { "i":"discard.after dot", "o":"discard" } ],
-    "test": [
+    "examples": [
+      { "i":"discard.after dot", "o":"discard" },
       { "i":"one two.three four", "o":"one two" } ] },
   { "name":"dots to spaces",
-    "train": [
+    "examples": [
       { "i":"ruby.clinton", "o":"ruby clinton" },
-      { "i":"matthew.jack.rosman", "o":"matthew jack rosman" } ],
-    "test": [
+      { "i":"matthew.jack.rosman", "o":"matthew jack rosman" },
       { "i":"brent.harold", "o":"brent harold" },
       { "i":"one.two.three.four", "o":"one two three four" } ] },
   { "name":"nospaces",
-    "train": [
-      { "i":"no matter how many", "o":"nomatterhowmany" } ],
-    "test": [
+    "examples": [
+      { "i":"no matter how many", "o":"nomatterhowmany" },
       { "i":"no spaces", "o":"nospaces" } ] },
   { "name":"feach cap",
-    "train": [
+    "examples": [
       { "i":"ruby clinton", "o":"Ruby Clinton" },
-      { "i":"matthew jack rosman", "o":"Matthew Jack Rosman" } ],
-    "test": [] },
+      { "i":"matthew jack rosman", "o":"Matthew Jack Rosman" } ] },
   { "name":"ruby.clinton -> Ruby Clinton",
-    "train": [
+    "examples": [
       { "i":"ruby.clinton", "o":"Ruby Clinton" },
-      { "i":"matthew.jack.rosman", "o":"Matthew Jack Rosman" } ],
-    "test": [] },
+      { "i":"matthew.jack.rosman", "o":"Matthew Jack Rosman" } ] },
  { "name":"ruby.clinton@mit.edu -> Ruby Clinton",
-   "train": [
+   "examples": [
      { "i":"ruby.clinton@mit.edu", "o":"Ruby Clinton" },
-     { "i":"matthew.jack.rosman@yahoo.com", "o":"Matthew Jack Rosman" } ],
-   "test": [
+     { "i":"matthew.jack.rosman@yahoo.com", "o":"Matthew Jack Rosman" },
      { "i":"josh.smith@gmail.com", "o":"Josh Smith" } ] }
 ]}

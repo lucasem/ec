@@ -59,15 +59,18 @@ module T = struct
   let b = make "bool"
   let s = make "string"
   let c = make "char"
-  let l = make "list"
+  let l x = TCon("list", [x])
 end
 
 module Expr = struct
   type e = Expression.expression = Terminal of string * T.t * unit ref | Application of e * e
-  let run q = Expression.run_expression_for_interval 0.1 q
+  let run = Expression.run_expression
   let of_int n = Terminal(string_of_int n, T.i, Obj.magic (ref n))
   let of_str s = Terminal(s, T.s, Obj.magic (ref s))
-  let of_list l = Terminal(List.to_string ~f:string_of_int l, T.l, Obj.magic (ref l))
+  let of_char_list cl = Terminal(
+    String.concat ~sep:"" (List.map ~f:(String.make 1) cl),
+    T.l T.c, Obj.magic (ref cl))
+  let of_int_list l = Terminal(List.to_string ~f:string_of_int l, T.l T.i, Obj.magic (ref l))
   let to_str e = Expression.string_of_expression e
   let unmarshal prims = Library.expression_of_string_with_combs prims
 end
@@ -112,13 +115,13 @@ let ec
   and progs = get_some !p in
   grammar, progs
 
-type 'a problem = { i: Expr.e; o: 'a }
+type problem = { i: Expr.e; o: unit ref }
 
 let task_of_problems problems ~t ~name =
   let single_score_func e p logl =
     let q = Expr.Application(e, p.i) in
     match Expr.run q with
-    | Some(r) when r = p.o -> logl
+    | Some(r) when r = (!(Obj.magic p.o)) -> logl
     | _ -> Core.Float.neg_infinity
   in
   let score_func = (fun (e : Expr.e) ->

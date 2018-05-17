@@ -30,16 +30,14 @@ let terminal_type = function
   | _ -> raise (Failure "terminal_type: not a terminal")
 
 let rec run_expression (e:expression) : 'a option =
-  match e with
+  try match e with
   | Terminal(n,_,_) when n = "bottom" -> None
   | Terminal(_,_,thing) -> Some(!(Obj.magic thing))
   | Application(f,x) ->
     match run_expression f with
     | None -> None
     | Some(left) -> (Obj.magic left) (Obj.magic (run_expression x))
-
-let run_expression_for_interval (time : float) (e : expression) : 'a option =
-  Time_limit.run_for_interval time (fun _ -> run_expression e)
+  with _ -> None
 
 let lift_quadinary k : unit ref = Obj.magic @@ ref (
   fun x -> Some(fun y -> Some(fun z -> Some(fun w ->
